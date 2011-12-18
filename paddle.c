@@ -79,6 +79,48 @@ const char *images_names[NUM_IMAGES] = {
 	DATA_PREFIX "images/puffle-blue-4.png"
 };
 
+/* Entrada 0 significa normal, 1 nuevo, 2 perdido */
+enum {
+	BACKGROUND_NORMAL = 0,
+	BACKGROUND_NEW,
+	BACKGROUND_FAIL
+};
+
+static int background_frames[15][3] = {
+	{0, 1, 8},
+	{2, 1, 8},
+	{3, 1, 8},
+	{4, 1, 8},
+	{5, 1, 8},
+	{6, 1, 8},
+	{7, 1, 8},
+	{0, 1, 8},
+	{9, 1, 8},
+	{10, 1, 8},
+	{11, 1, 8},
+	{12, 1, 8},
+	{13, 1, 8},
+	{14, 1, 8}
+};
+
+static int background_outputs[15] = {
+	IMG_BACKGROUND_NORMAL,
+	IMG_BACKGROUND_NEW_0,
+	IMG_BACKGROUND_NEW_0,
+	IMG_BACKGROUND_NEW_0,
+	IMG_BACKGROUND_NEW_0,
+	IMG_BACKGROUND_NEW_0,
+	IMG_BACKGROUND_NEW_1,
+	IMG_BACKGROUND_NEW_1,
+	IMG_BACKGROUND_FAIL_0,
+	IMG_BACKGROUND_FAIL_0,
+	IMG_BACKGROUND_FAIL_0,
+	IMG_BACKGROUND_FAIL_0,
+	IMG_BACKGROUND_FAIL_0,
+	IMG_BACKGROUND_FAIL_1,
+	IMG_BACKGROUND_FAIL_1
+};
+
 /* Prototipos de función */
 void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
@@ -88,19 +130,23 @@ SDL_Surface * screen;
 SDL_Surface * images[NUM_IMAGES];
 SDL_Rect rects[MAX_RECTS];
 int num_rects;
+int background_frame = 0;
 
 int main (int argc, char *argv[]) {
 	int done;
 	SDL_Event event;
+	SDLKey key;
 	Uint32 last_time, now_time;
 	setup ();
 	
 	done = 0;
-	SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], NULL, screen, NULL);
+	
 	do {
 		last_time = SDL_GetTicks ();
 		
 		num_rects = 0;
+		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
+		SDL_Flip (screen);
 		
 		while (SDL_PollEvent(&event) > 0) {
 			switch (event.type) {
@@ -112,11 +158,23 @@ int main (int argc, char *argv[]) {
 					/* Tengo un Mouse Down */
 					
 					break;
+				case SDL_KEYDOWN:
+					/* Tengo una tecla presionada */
+					key = event.key.keysym.sym;
+					
+					if (key == SDLK_z) {
+						background_frame = background_frames [background_frame][BACKGROUND_NEW];
+					} else if (key == SDLK_x) {
+						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
+					}
+					break;
 				/*case SDL_VIDEOEXPOSE:
 					refresh = 1;
 					break;*/
 			}
 		}
+		
+		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);

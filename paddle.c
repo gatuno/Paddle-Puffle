@@ -87,10 +87,45 @@ SDL_Surface * set_video_mode(unsigned flags);
 SDL_Surface * screen;
 SDL_Surface * images[NUM_IMAGES];
 SDL_Rect rects[MAX_RECTS];
+int num_rects;
 
 int main (int argc, char *argv[]) {
-	
+	int done;
+	SDL_Event event;
+	Uint32 last_time, now_time;
 	setup ();
+	
+	done = 0;
+	SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], NULL, screen, NULL);
+	do {
+		last_time = SDL_GetTicks ();
+		
+		num_rects = 0;
+		
+		while (SDL_PollEvent(&event) > 0) {
+			switch (event.type) {
+				case SDL_QUIT:
+					/* Vamos a cerrar la aplicación */
+					done = 1;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					/* Tengo un Mouse Down */
+					
+					break;
+				/*case SDL_VIDEOEXPOSE:
+					refresh = 1;
+					break;*/
+			}
+		}
+		
+		now_time = SDL_GetTicks ();
+		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
+		
+		/* Actualizar las zonas de la pantalla */
+		/*fprintf (stdout, "Print: Num_Rects: %i\n", num_rects);
+		fprintf (stdout, "Rect[0], x=%i, y=%i, w=%i, h=%i\n", rects[0].x, rects[0].y, rects[0].w, rects[0].h); */
+		SDL_UpdateRects (screen, num_rects, rects);
+	} while (!done);
 	return 0;
 }
 

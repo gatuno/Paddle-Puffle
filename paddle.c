@@ -131,9 +131,31 @@ static int background_outputs[15] = {
 };
 
 /* Autómata para un puffle */
+enum {
+	PUFFLE_NORMAL = 0,
+	PUFFLE_FALL,
+	PUFFLE_BOUNCE,
+	NUM_PUFFLE_MODS
+};
 
-static int puffle_frames [17] = {
-	0, 2, 3, 4, 5, 6, 7, 4, 9, 10, 11, 12, 13, 14, 15, 16, 0
+static int puffle_frames [17][NUM_PUFFLE_MODS] = {
+	{0, 1, 8},
+	{2, 1, 8},
+	{3, 2, 8},
+	{4, 3, 8},
+	{5, 4, 8},
+	{6, 5, 8},
+	{7, 6, 8},
+	{4, 7, 8},
+	{9, 8, 8},
+	{10, 9, 9},
+	{11, 10, 10},
+	{12, 11, 11},
+	{13, 12, 12},
+	{14, 13, 13},
+	{15, 14, 14},
+	{16, 15, 15},
+	{0, 16, 16}
 };
 
 static int puffle_outputs [17] = {
@@ -221,7 +243,7 @@ int main (int argc, char *argv[]) {
 					if (key == SDLK_q) {
 						/* Bounce the puffle */
 						puffle_y_virtual = -20;
-						puffle_frame = 8;
+						puffle_frame = puffle_frames [puffle_frame][PUFFLE_BOUNCE];
 					}
 					break;
 				/*case SDL_VIDEOEXPOSE:
@@ -237,20 +259,13 @@ int main (int argc, char *argv[]) {
 		if (puffle_y_virtual < -10) puffle_y_virtual *= 0.9;
 		else puffle_y_virtual += 1;
 		
-		if (puffle_y_virtual > 6 && puffle_frame == 0) {
-			puffle_frame = 1;
+		if (puffle_y_virtual > 6) {
+			puffle_frame = puffle_frames [puffle_frame][PUFFLE_FALL];
 		} /*else if (puffle_y_virtual < -6) {
 			puffle_frame = puffle_frames [puffle_frame];
 		}*/
 		
-		puffle_frame = puffle_frames [puffle_frame];
-		
-		if (puffle_frame == -1) {
-			fprintf (stdout, "Error en el autómata\n");
-			exit (4);
-		}
-		
-		/*fprintf (stdout, "Puffle, y: %i; y_virtual: %.2f\n", puffle_y_real, puffle_y_virtual);*/
+		puffle_frame = puffle_frames [puffle_frame][PUFFLE_NORMAL];
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
@@ -292,7 +307,7 @@ void setup (void) {
 	
 	if (screen == NULL) {
 		fprintf (stderr,
-			"\nError: I could not set up video for 640x480 mode.\n"
+			"\nError: I could not set up video for 760x480 mode.\n"
 			"The Simple DirectMedia error that occured was:\n"
 			"%s\n\n", SDL_GetError());
 		exit (1);

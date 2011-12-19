@@ -47,10 +47,14 @@ enum {
 	IMG_PADDLE_3,
 	IMG_PADDLE_4,
 	
-	IMG_BLUE_1,
-	IMG_BLUE_2,
-	IMG_BLUE_3,
-	IMG_BLUE_4,
+	IMG_BLUE_NORMAL_1,
+	IMG_BLUE_FALL_1,
+	IMG_BLUE_FALL_2,
+	IMG_BLUE_FALL_3,
+	IMG_BLUE_BOUNCE_1,
+	IMG_BLUE_BOUNCE_2,
+	IMG_BLUE_BOUNCE_3,
+	IMG_BLUE_BOUNCE_4,
 	
 	NUM_IMAGES
 };
@@ -76,7 +80,11 @@ const char *images_names[NUM_IMAGES] = {
 	DATA_PREFIX "images/puffle-blue-1.png",
 	DATA_PREFIX "images/puffle-blue-2.png",
 	DATA_PREFIX "images/puffle-blue-3.png",
-	DATA_PREFIX "images/puffle-blue-4.png"
+	DATA_PREFIX "images/puffle-blue-4.png",
+	DATA_PREFIX "images/puffle-blue-5.png",
+	DATA_PREFIX "images/puffle-blue-6.png",
+	DATA_PREFIX "images/puffle-blue-7.png",
+	DATA_PREFIX "images/puffle-blue-8.png"
 };
 
 /* Entrada 0 significa normal, 1 nuevo, 2 perdido */

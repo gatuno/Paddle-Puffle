@@ -94,6 +94,7 @@ enum {
 	BACKGROUND_FAIL
 };
 
+/* Autómata para el fondo */
 static int background_frames[15][3] = {
 	{0, 1, 8},
 	{2, 1, 8},
@@ -117,16 +118,42 @@ static int background_outputs[15] = {
 	IMG_BACKGROUND_NEW_0,
 	IMG_BACKGROUND_NEW_0,
 	IMG_BACKGROUND_NEW_0,
-	IMG_BACKGROUND_NEW_0,
 	IMG_BACKGROUND_NEW_1,
 	IMG_BACKGROUND_NEW_1,
-	IMG_BACKGROUND_FAIL_0,
+	IMG_BACKGROUND_NEW_1,
 	IMG_BACKGROUND_FAIL_0,
 	IMG_BACKGROUND_FAIL_0,
 	IMG_BACKGROUND_FAIL_0,
 	IMG_BACKGROUND_FAIL_0,
 	IMG_BACKGROUND_FAIL_1,
+	IMG_BACKGROUND_FAIL_1,
 	IMG_BACKGROUND_FAIL_1
+};
+
+/* Autómata para un puffle */
+
+static int puffle_frames [17] = {
+	0, 2, 3, 4, 5, 6, 7, 4, 9, 10, 11, 12, 13, 14, 15, 16, 0
+};
+
+static int puffle_outputs [17] = {
+	IMG_BLUE_NORMAL_1,
+	IMG_BLUE_FALL_1,
+	IMG_BLUE_FALL_1,
+	IMG_BLUE_FALL_1,
+	IMG_BLUE_FALL_2,
+	IMG_BLUE_FALL_2,
+	IMG_BLUE_FALL_3,
+	IMG_BLUE_FALL_3,
+	IMG_BLUE_BOUNCE_1,
+	IMG_BLUE_BOUNCE_1,
+	IMG_BLUE_BOUNCE_1,
+	IMG_BLUE_BOUNCE_2,
+	IMG_BLUE_BOUNCE_2,
+	IMG_BLUE_BOUNCE_3,
+	IMG_BLUE_BOUNCE_3,
+	IMG_BLUE_BOUNCE_4,
+	IMG_BLUE_BOUNCE_4
 };
 
 /* Prototipos de función */
@@ -137,15 +164,25 @@ SDL_Surface * set_video_mode(unsigned flags);
 SDL_Surface * screen;
 SDL_Surface * images[NUM_IMAGES];
 SDL_Rect rects[MAX_RECTS];
+/*Puffle *first_puffle = NULL;
+Puffle *last_puffle = NULL;*/
 int num_rects;
 int background_frame = 0;
+
+/* Temp */
+int puffle_frame = 0;
+float puffle_y_virtual = 0;
+int puffle_y_real = -40;
 
 int main (int argc, char *argv[]) {
 	int done;
 	SDL_Event event;
 	SDLKey key;
 	Uint32 last_time, now_time;
+	SDL_Rect puf;
+	
 	setup ();
+	
 	
 	done = 0;
 	
@@ -154,6 +191,11 @@ int main (int argc, char *argv[]) {
 		
 		num_rects = 0;
 		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
+		
+		puf.x = 200 - (images [puffle_outputs [puffle_frame]]->w / 2);
+		puf.y = puffle_y_real - images [puffle_outputs [puffle_frame]]->h;
+		puf.w = images [puffle_outputs [puffle_frame]]->w; puf.h = images [puffle_outputs [puffle_frame]]->h;
+		SDL_BlitSurface (images [puffle_outputs [puffle_frame]], NULL, screen, &puf);
 		SDL_Flip (screen);
 		
 		while (SDL_PollEvent(&event) > 0) {
@@ -175,6 +217,12 @@ int main (int argc, char *argv[]) {
 					} else if (key == SDLK_x) {
 						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
 					}
+					
+					if (key == SDLK_q) {
+						/* Bounce the puffle */
+						puffle_y_virtual = -20;
+						puffle_frame = 8;
+					}
 					break;
 				/*case SDL_VIDEOEXPOSE:
 					refresh = 1;
@@ -183,6 +231,26 @@ int main (int argc, char *argv[]) {
 		}
 		
 		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
+		
+		puffle_y_real = puffle_y_real + puffle_y_virtual;
+		
+		if (puffle_y_virtual < -10) puffle_y_virtual *= 0.9;
+		else puffle_y_virtual += 1;
+		
+		if (puffle_y_virtual > 6 && puffle_frame == 0) {
+			puffle_frame = 1;
+		} /*else if (puffle_y_virtual < -6) {
+			puffle_frame = puffle_frames [puffle_frame];
+		}*/
+		
+		puffle_frame = puffle_frames [puffle_frame];
+		
+		if (puffle_frame == -1) {
+			fprintf (stdout, "Error en el autómata\n");
+			exit (4);
+		}
+		
+		/*fprintf (stdout, "Puffle, y: %i; y_virtual: %.2f\n", puffle_y_real, puffle_y_virtual);*/
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
@@ -242,7 +310,7 @@ void setup (void) {
 			exit (1);
 		}
 		
-		images[g] = SDL_DisplayFormat (image);
+		/*images[g] = SDL_DisplayFormat (image);
 		
 		if (images[g] == NULL) {
 			fprintf (stderr,
@@ -252,7 +320,8 @@ void setup (void) {
 			exit (EXIT_FAILURE);
 		}
 		
-		SDL_FreeSurface (image);
+		SDL_FreeSurface (image); */
+		images[g] = image;
 		/* TODO: Mostrar la carga de porcentaje */
 	}
 	

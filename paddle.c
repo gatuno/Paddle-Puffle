@@ -26,8 +26,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-#define MAX_RECTS 512
-
 #define FPS (1000/24)
 
 /* Enumerar las imágenes */
@@ -198,7 +196,6 @@ SDL_Surface * set_video_mode(unsigned flags);
 /* Variables globales */
 SDL_Surface * screen;
 SDL_Surface * images[NUM_IMAGES];
-SDL_Rect rects[MAX_RECTS];
 Puffle *first_puffle = NULL;
 Puffle *last_puffle = NULL;
 int num_rects;
@@ -218,13 +215,11 @@ int main (int argc, char *argv[]) {
 	
 	setup ();
 	
-	
 	done = 0;
 	
 	do {
 		last_time = SDL_GetTicks ();
 		
-		num_rects = 0;
 		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
 		
 		puf.x = 200 - (images [puffle_outputs [puffle_frame]]->w / 2);
@@ -283,10 +278,7 @@ int main (int argc, char *argv[]) {
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 		
-		/* Actualizar las zonas de la pantalla */
-		/*fprintf (stdout, "Print: Num_Rects: %i\n", num_rects);
-		fprintf (stdout, "Rect[0], x=%i, y=%i, w=%i, h=%i\n", rects[0].x, rects[0].y, rects[0].w, rects[0].h); */
-		SDL_UpdateRects (screen, num_rects, rects);
+		SDL_Flip (screen);
 	} while (!done);
 	return 0;
 }

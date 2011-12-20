@@ -178,6 +178,19 @@ static int puffle_outputs [17] = {
 	IMG_BLUE_BOUNCE_4
 };
 
+/* La estructura principal de un puffle */
+typedef struct _Puffle{
+	struct _Puffle *next;
+	struct _Puffle *prev;
+	int x;
+	int y;
+	float x_virtual;
+	float y_virtual;
+	int pop_num;
+	int color;
+	int frame;
+} Puffle;
+
 /* Prototipos de función */
 void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
@@ -186,8 +199,8 @@ SDL_Surface * set_video_mode(unsigned flags);
 SDL_Surface * screen;
 SDL_Surface * images[NUM_IMAGES];
 SDL_Rect rects[MAX_RECTS];
-/*Puffle *first_puffle = NULL;
-Puffle *last_puffle = NULL;*/
+Puffle *first_puffle = NULL;
+Puffle *last_puffle = NULL;
 int num_rects;
 int background_frame = 0;
 
@@ -344,5 +357,52 @@ void setup (void) {
 	
 	/* Generador de números aleatorios */
 	srand (SDL_GetTicks ());
+}
+
+void nuevo_puffle (void) {
+	Puffle *new;
+	new = (Puffle *) malloc (sizeof (Puffle));
+	
+	/* Inicializar el Puffle */
+	new->color = 0; /* TODO: Cambiar el color */
+	new->x_virtual = new->y_virtual = new->pop_num = 0;
+	
+	new->y = -40;
+	new->x = 300; /* TODO: Debe ser random */
+	
+	/* Ahora sus campos para lista doble ligada */
+	new->next = NULL;
+	new->prev = last_puffle;
+	
+	if (last_puffle == NULL) {
+		first_puffle = last_puffle = new;
+	} else {
+		last_puffle->next = new;
+		last_puffle = new;
+	}
+	
+	/* Background, dame un "more" */
+	background_frame = background_frames [background_frame][BACKGROUND_NEW];
+}
+
+void eliminar_puffle (Puffle *p) {
+	if (p == NULL) return NULL;
+	
+	if (p->prev == NULL) { /* El primero de la lista */
+		first_puffle = p->next;
+	} else {
+		p->prev->next = p->next;
+	}
+	
+	if (p->next == NULL) {
+		last_puffle = p->prev;
+	} else {
+		p->next->prev = p->prev;
+	}
+	
+	free (p);
+	
+	/* Background, dame un "miss" */
+	background_frame = background_frames [background_frame][BACKGROUND_FAIL];
 }
 

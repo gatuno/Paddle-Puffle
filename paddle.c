@@ -190,8 +190,11 @@ typedef struct _Puffle{
 } Puffle;
 
 /* Prototipos de función */
+int game_loop (void);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
+void nuevo_puffle (void);
+void eliminar_puffle (Puffle *p);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -208,25 +211,35 @@ int puffle_y_real = -40;
 
 int main (int argc, char *argv[]) {
 	int done;
-	SDL_Event event;
-	SDLKey key;
-	Uint32 last_time, now_time;
-	SDL_Rect puf;
 	
 	setup ();
 	
-	done = 0;
+	done = game_loop ();
+	
+	return 0;
+}
+
+int game_loop (void) {
+	int done = 0;
+	SDL_Event event;
+	SDLKey key;
+	Uint32 last_time, now_time;
+	SDL_Rect puf_pos;
+	
+	int handposx2, handposx1, handposx, handposy2, handposy1, handposy;
+	int fuerzax, fuerzay;
+	int poder;
+	int speed = 10, balance = 4;
+	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0;
+	int goal = 20, default_goal = 20;
+	Puffle *thispuffle;
+	
+	nuevo_puffle ();
 	
 	do {
 		last_time = SDL_GetTicks ();
 		
 		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
-		
-		puf.x = 200 - (images [puffle_outputs [puffle_frame]]->w / 2);
-		puf.y = puffle_y_real - images [puffle_outputs [puffle_frame]]->h;
-		puf.w = images [puffle_outputs [puffle_frame]]->w; puf.h = images [puffle_outputs [puffle_frame]]->h;
-		SDL_BlitSurface (images [puffle_outputs [puffle_frame]], NULL, screen, &puf);
-		SDL_Flip (screen);
 		
 		while (SDL_PollEvent(&event) > 0) {
 			switch (event.type) {
@@ -260,29 +273,89 @@ int main (int argc, char *argv[]) {
 			}
 		}
 		
+		/* TODO: Calculo del gol */
+		thispuffle = first_puffle;
+		do {
+			if (thispuffle->y > 500) {
+				/* Este puffle está perdido */
+				n_puffles--;
+				dropped_puffles++;
+				
+				if (n_puffles > 4) {
+					goal = default_goal;
+				} else if (n_puffles >= most_puffles) {
+					goal = n_puffles * 20;
+				} else {
+					goal = n_puffles * 10;
+				}
+				
+				if (thispuffle->prev != NULL) {
+					thispuffle = thispuffle->prev;
+					eliminar_puffle (thispuffle->next);
+				} else {
+					eliminar_puffle (thispuffle);
+					thispuffle = first_puffle;
+				}
+			}
+			if (thispuffle != NULL) thispuffle = thispuffle->next;
+		} while (thispuffle != NULL);
+		
+		if (first_puffle == NULL) {
+			done = 1;
+			break;
+		}
+		
+		thispuffle = first_puffle;
+		do {
+			thispuffle->x = thispuffle->x + thispuffle->x_virtual;
+			thispuffle->y = thispuffle->y + thispuffle->y_virtual;
+			
+			if (thispuffle->x >= 720 && thispuffle->x_virtual >= 0) thispuffle->x_virtual *= -1;
+			if (thispuffle->x <= 40 && thispuffle->x_virtual < 0) thispuffle->x_virtual *= -1;
+			
+			if (thispuffle->y_virtual < -10) thispuffle->y_virtual *= 0.9;
+			else thispuffle->y_virtual += 1; /* 1 de "Gravity" */
+			
+			if (thispuffle->x_virtual > 30 || thispuffle->x_virtual < -30) {
+				thispuffle->x_virtual *= 0.95;
+			}
+			
+			/* Score & windcount */
+			
+			if (thispuffle->y > -99) {
+				/* TODO: Calculo de colisiones */
+			}
+			
+			if (thispuffle->y_virtual > 6) {
+				thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_FALL];
+			}
+			
+			thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_NORMAL];
+			
+			if (thispuffle->y > -100) {
+				/* Blit this puffle */
+				puf_pos.x = thispuffle->x - (images [puffle_outputs [thispuffle->frame]]->w / 2);
+				puf_pos.y = thispuffle->y - images [puffle_outputs [thispuffle->frame]]->h;
+				puf_pos.w = images [puffle_outputs [thispuffle->frame]]->w;
+				puf_pos.h = images [puffle_outputs [thispuffle->frame]]->h;
+				SDL_BlitSurface (images [puffle_outputs [thispuffle->frame]], NULL, screen, &puf_pos);
+			}
+			
+			if (thispuffle != NULL) thispuffle = thispuffle->next;
+		} while (thispuffle != NULL);
+		
+		/* Avanzar el escenario */
 		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
 		
-		puffle_y_real = puffle_y_real + puffle_y_virtual;
-		
-		if (puffle_y_virtual < -10) puffle_y_virtual *= 0.9;
-		else puffle_y_virtual += 1;
-		
-		if (puffle_y_virtual > 6) {
-			puffle_frame = puffle_frames [puffle_frame][PUFFLE_FALL];
-		} /*else if (puffle_y_virtual < -6) {
-			puffle_frame = puffle_frames [puffle_frame];
-		}*/
-		
-		puffle_frame = puffle_frames [puffle_frame][PUFFLE_NORMAL];
+		SDL_Flip (screen);
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 		
-		SDL_Flip (screen);
 	} while (!done);
-	return 0;
+	
+	return done;
 }
-
 /* Set video mode: */
 /* Mattias Engdegard <f91-men@nada.kth.se> */
 SDL_Surface * set_video_mode (unsigned flags) {
@@ -357,6 +430,7 @@ void nuevo_puffle (void) {
 	
 	/* Inicializar el Puffle */
 	new->color = 0; /* TODO: Cambiar el color */
+	new->frame = 0;
 	new->x_virtual = new->y_virtual = new->pop_num = 0;
 	
 	new->y = -40;

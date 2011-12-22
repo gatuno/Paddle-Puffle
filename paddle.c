@@ -20,6 +20,18 @@
  * Boston, MA  02110-1301  USA
  */
 
+/* ----------------
+ * LEGAL NOTICE
+ * ----------------
+ *
+ * This game is NOT related to Club Penguin in any way. Also,
+ * this game is not intended to infringe copyrights, the graphics and
+ * sounds used are Copyright of Disney.
+ *
+ * The new SDL code is written by Gatuno, and is released under
+ * the term of the GNU General Public License.
+ * /
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -227,11 +239,6 @@ Puffle *last_puffle = NULL;
 int num_rects;
 int background_frame = 0;
 
-/* Temp */
-int puffle_frame = 0;
-float puffle_y_virtual = 0;
-int puffle_y_real = -40;
-
 int main (int argc, char *argv[]) {
 	int done;
 	
@@ -251,10 +258,11 @@ int game_loop (void) {
 	
 	int handposx2, handposx1, handposx, handposy2, handposy1, handposy;
 	int fuerzax, fuerzay;
-	int poder;
-	int speed = 10, balance = 4;
+	float poder;
+	float speed = 10, balance = 4;
 	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0;
 	int goal = 20, default_goal = 20;
+	int score = 0, count = 0, bounces = 0;
 	int paddle_x, paddle_y, paddle_frame = 0;
 	Puffle *thispuffle;
 	
@@ -290,15 +298,7 @@ int game_loop (void) {
 						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
 					}
 					
-					if (key == SDLK_q) {
-						/* Bounce the puffle */
-						puffle_y_virtual = -20;
-						puffle_frame = puffle_frames [puffle_frame][PUFFLE_BOUNCE];
-					}
-					
-					if (key == SDLK_w) {
-						paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
-					}
+					/* TODO: Toggle Fullscreen */
 					break;
 				/*case SDL_VIDEOEXPOSE:
 					refresh = 1;
@@ -306,7 +306,33 @@ int game_loop (void) {
 			}
 		}
 		
-		/* TODO: Calculo del gol */
+		if (count >= goal) {
+			count = 0;
+			n_puffles++;
+	
+			if (n_puffles > 4) {
+				goal = default_goal;
+		
+				if (default_goal > 5) {
+					default_goal--;
+				}
+		
+				if (dropped_puffles > 49) {
+					default_goal += 20;
+					dropped_puffles = 0;
+				}
+			} else if (n_puffles >= most_puffles) {
+				goal = n_puffles * 20;
+			} else {
+				goal = n_puffles * 10;
+			}
+	
+			if (most_puffles < n_puffles) {
+				most_puffles = n_puffles;
+			}
+	
+			nuevo_puffle ();
+		}
 		
 		handposy2 = handposy1;
 		handposy1 = handposy;
@@ -359,6 +385,14 @@ int game_loop (void) {
 		
 		paddle_frame = paddle_frames[paddle_frame][PADDLE_NORMAL];
 		
+		/* Blit el paddle */
+		puf_pos.x = paddle_x - (images [paddle_outputs [paddle_frame]]->w / 2);
+		puf_pos.y = paddle_y - (images [paddle_outputs [paddle_frame]]->h / 2);
+		puf_pos.h = images [paddle_outputs [paddle_frame]]->h;
+		puf_pos.w = images [paddle_outputs [paddle_frame]]->w;
+		
+		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
+		
 		thispuffle = first_puffle;
 		do {
 			thispuffle->x = thispuffle->x + thispuffle->x_virtual;
@@ -376,8 +410,36 @@ int game_loop (void) {
 			
 			/* Score & windcount */
 			
-			if (thispuffle->y > -99) {
-				/* TODO: Calculo de colisiones */
+			if (thispuffle->y > -99 && thispuffle->y_virtual >= 0) {
+				if ((thispuffle->x > handposx - 70 && thispuffle->x < handposx + 70) && ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) || (thispuffle->y > handposy && thispuffle->y < handposy2))) {
+					/* Bounce the puffle */
+					thispuffle->x_virtual = (thispuffle->x - (handposx + fuerzax)) / balance;
+					thispuffle->y_virtual = -1 * (speed + poder);
+					
+					score++; bounces++; count++;
+					
+					if (speed < 40) speed += 0.2;
+					else if (balance > 2) balance -= 0.2;
+					
+					/* TODO: Role and poptxt */
+					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
+					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
+				}
+				
+				if ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) && ((thispuffle->x > handposx && thispuffle->x < handposx2) || (thispuffle->x < handposx && thispuffle->x > handposx2))) {
+					/* Bounce the puffle */
+					thispuffle->x_virtual = (thispuffle->x - (handposx + fuerzax)) / balance;
+					thispuffle->y_virtual = -1 * (speed + poder);
+					
+					score++; bounces++; count++;
+					
+					if (speed < 40) speed += 0.2;
+					else if (balance > 2) balance -= 0.2;
+					
+					/* TODO: Role and poptxt */
+					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
+					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
+				}
 			}
 			
 			if (thispuffle->y_virtual > 6) {
@@ -400,14 +462,6 @@ int game_loop (void) {
 		
 		/* Avanzar el escenario */
 		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
-		
-		/* Blit el paddle */
-		puf_pos.x = paddle_x - (images [paddle_outputs [paddle_frame]]->w / 2);
-		puf_pos.y = paddle_y - (images [paddle_outputs [paddle_frame]]->h / 2);
-		puf_pos.h = images [paddle_outputs [paddle_frame]]->h;
-		puf_pos.w = images [paddle_outputs [paddle_frame]]->w;
-		
-		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
 		
 		SDL_Flip (screen);
 		
@@ -481,6 +535,8 @@ void setup (void) {
 	}
 	
 	/* TODO: Inicializar la TTF */
+	
+	/* TODO: Inicializar la música y cargar los sonidos */
 	
 	/* Generador de números aleatorios */
 	srand (SDL_GetTicks ());

@@ -176,6 +176,29 @@ static int puffle_outputs [17] = {
 	IMG_BLUE_BOUNCE_4
 };
 
+/* Autómata para el paddle */
+enum {
+	PADDLE_NORMAL = 0,
+	PADDLE_BOUNCE,
+	NUM_PADDLE_MODS
+};
+
+static int paddle_frames [5][NUM_PADDLE_MODS] = {
+	{0, 1},
+	{2, 1},
+	{3, 2},
+	{4, 3},
+	{0, 4}
+};
+
+static int paddle_outputs [5] = {
+	IMG_PADDLE_1,
+	IMG_PADDLE_2,
+	IMG_PADDLE_2,
+	IMG_PADDLE_3,
+	IMG_PADDLE_4
+};
+
 /* La estructura principal de un puffle */
 typedef struct _Puffle{
 	struct _Puffle *next;
@@ -232,9 +255,15 @@ int game_loop (void) {
 	int speed = 10, balance = 4;
 	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0;
 	int goal = 20, default_goal = 20;
+	int paddle_x, paddle_y, paddle_frame = 0;
 	Puffle *thispuffle;
 	
 	nuevo_puffle ();
+	
+	SDL_GetMouseState (&handposx, &handposy);
+	
+	paddle_x = handposx2 = handposx1 = handposx;
+	paddle_y = handposy2 = handposy1 = handposy;
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -266,6 +295,10 @@ int game_loop (void) {
 						puffle_y_virtual = -20;
 						puffle_frame = puffle_frames [puffle_frame][PUFFLE_BOUNCE];
 					}
+					
+					if (key == SDLK_w) {
+						paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
+					}
 					break;
 				/*case SDL_VIDEOEXPOSE:
 					refresh = 1;
@@ -274,6 +307,22 @@ int game_loop (void) {
 		}
 		
 		/* TODO: Calculo del gol */
+		
+		handposy2 = handposy1;
+		handposy1 = handposy;
+		
+		handposx2 = handposx1;
+		handposx1 = handposx;
+		
+		SDL_GetMouseState (&handposx, &handposy);
+		
+		fuerzay = handposy2 - handposy;
+		
+		if (fuerzay > 0) poder = fuerzay / 6;
+		else poder = 0;
+		
+		fuerzax = handposx2 - handposx;
+		
 		thispuffle = first_puffle;
 		do {
 			if (thispuffle->y > 500) {
@@ -304,6 +353,11 @@ int game_loop (void) {
 			done = 1;
 			break;
 		}
+		
+		paddle_x = handposx;
+		paddle_y = handposy;
+		
+		paddle_frame = paddle_frames[paddle_frame][PADDLE_NORMAL];
 		
 		thispuffle = first_puffle;
 		do {
@@ -346,6 +400,14 @@ int game_loop (void) {
 		
 		/* Avanzar el escenario */
 		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
+		
+		/* Blit el paddle */
+		puf_pos.x = paddle_x - (images [paddle_outputs [paddle_frame]]->w / 2);
+		puf_pos.y = paddle_y - (images [paddle_outputs [paddle_frame]]->h / 2);
+		puf_pos.h = images [paddle_outputs [paddle_frame]]->h;
+		puf_pos.w = images [paddle_outputs [paddle_frame]]->w;
+		
+		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
 		
 		SDL_Flip (screen);
 		
@@ -452,7 +514,7 @@ void nuevo_puffle (void) {
 }
 
 void eliminar_puffle (Puffle *p) {
-	if (p == NULL) return NULL;
+	if (p == NULL) return;
 	
 	if (p->prev == NULL) { /* El primero de la lista */
 		first_puffle = p->next;

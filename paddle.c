@@ -30,7 +30,7 @@
  *
  * The new SDL code is written by Gatuno, and is released under
  * the term of the GNU General Public License.
- * /
+ */
 
 #include <stdlib.h>
 #include <stdio.h>

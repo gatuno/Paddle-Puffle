@@ -552,7 +552,7 @@ void nuevo_puffle (void) {
 	new->x_virtual = new->y_virtual = new->pop_num = 0;
 	
 	new->y = -40;
-	new->x = 300; /* TODO: Debe ser random */
+	new->x = 20 + (int) (720.0 * rand () / (RAND_MAX + 1.0));
 	
 	/* Ahora sus campos para lista doble ligada */
 	new->next = NULL;

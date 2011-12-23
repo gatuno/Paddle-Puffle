@@ -72,29 +72,29 @@ enum {
 /* Los nombres de archivos */
 
 const char *images_names[NUM_IMAGES] = {
-	DATA_PREFIX "images/title.png",
+	GAMEDATA_DIR "images/title.png",
 	
-	DATA_PREFIX "images/normal.png",
+	GAMEDATA_DIR "images/normal.png",
 	
-	DATA_PREFIX "images/new-0.png",
-	DATA_PREFIX "images/new-1.png",
+	GAMEDATA_DIR "images/new-0.png",
+	GAMEDATA_DIR "images/new-1.png",
 	
-	DATA_PREFIX "images/fail-0.png",
-	DATA_PREFIX "images/fail-1.png",
+	GAMEDATA_DIR "images/fail-0.png",
+	GAMEDATA_DIR "images/fail-1.png",
 	
-	DATA_PREFIX "images/paddle-1.png",
-	DATA_PREFIX "images/paddle-2.png",
-	DATA_PREFIX "images/paddle-3.png",
-	DATA_PREFIX "images/paddle-4.png",
+	GAMEDATA_DIR "images/paddle-1.png",
+	GAMEDATA_DIR "images/paddle-2.png",
+	GAMEDATA_DIR "images/paddle-3.png",
+	GAMEDATA_DIR "images/paddle-4.png",
 	
-	DATA_PREFIX "images/puffle-blue-1.png",
-	DATA_PREFIX "images/puffle-blue-2.png",
-	DATA_PREFIX "images/puffle-blue-3.png",
-	DATA_PREFIX "images/puffle-blue-4.png",
-	DATA_PREFIX "images/puffle-blue-5.png",
-	DATA_PREFIX "images/puffle-blue-6.png",
-	DATA_PREFIX "images/puffle-blue-7.png",
-	DATA_PREFIX "images/puffle-blue-8.png"
+	GAMEDATA_DIR "images/puffle-blue-1.png",
+	GAMEDATA_DIR "images/puffle-blue-2.png",
+	GAMEDATA_DIR "images/puffle-blue-3.png",
+	GAMEDATA_DIR "images/puffle-blue-4.png",
+	GAMEDATA_DIR "images/puffle-blue-5.png",
+	GAMEDATA_DIR "images/puffle-blue-6.png",
+	GAMEDATA_DIR "images/puffle-blue-7.png",
+	GAMEDATA_DIR "images/puffle-blue-8.png"
 };
 
 /* Entrada 0 significa normal, 1 nuevo, 2 perdido */

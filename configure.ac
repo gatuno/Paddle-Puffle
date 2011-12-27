@@ -25,13 +25,18 @@ SDL_IMAGE_VERSION=1.2.10
 
 AC_MSG_CHECKING([if you have SDL installed on your system])
 PKG_CHECK_EXISTS([sdl >= $SDL_VERSION], [AC_MSG_RESULT([yes])], [AC_MSG_FAILURE([SDL not found in your system])])
+PKG_CHECK_MODULES(SDL, [sdl >= $SDL_VERSION], [], [])
 
 AC_MSG_CHECKING([if you have SDL_image installed on your system])
 PKG_CHECK_EXISTS([SDL_image >= $SDL_IMAGE_VERSION], [AC_MSG_RESULT([yes])], [AC_MSG_FAILURE([SDL_image not found in your system])])
+PKG_CHECK_MODULES(SDL_image, [SDL_image >= $SDL_IMAGE_VERSION], [], [])
 
-PKG_CHECK_MODULES([PADDLE],
-	[sdl >= $SDL_VERSION
-	SDL_image >= $SDL_IMAGE_VERSION])
+# SDL_Mixer doesn't have pkg-config
+SDL_mixer_LIBS=""
+AC_ARG_VAR(SDL_mixer_LIBS, [linker flags for SDL_mixer])
+AC_MSG_CHECKING([if you have SDL_mixer installed on your system])
+AC_CHECK_HEADERS(SDL/SDL_mixer.h, [], [AC_MSG_FAILURE([SDL_mixer not found in your system])])
+AC_CHECK_LIB(SDL_mixer, main, [SDL_mixer_LIBS="-lSDL_mixer"], [AC_MSG_FAILURE([SDL_mixer not found in your system])])
 
 AC_CONFIG_HEADERS([config.h])
 

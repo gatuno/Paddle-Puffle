@@ -113,8 +113,8 @@ const char *sound_names[NUM_SOUNDS] = {
 	GAMEDATA_DIR "sounds/squeak2.wav",
 	GAMEDATA_DIR "sounds/squeak3.wav",
 	GAMEDATA_DIR "sounds/oldboing.wav",
-	GAMEDATA_DIR "sounds/over to down1.wav",
-	GAMEDATA_DIR "sounds/over to down2.wav",
+	GAMEDATA_DIR "sounds/overtodown1.wav",
+	GAMEDATA_DIR "sounds/overtodown2.wav",
 };
 
 #define MUS_CARNIE GAMEDATA_DIR "music/carnie.ogg"

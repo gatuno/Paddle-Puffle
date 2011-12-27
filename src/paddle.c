@@ -281,6 +281,7 @@ int game_loop (void) {
 	SDLKey key;
 	Uint32 last_time, now_time;
 	SDL_Rect puf_pos;
+	int sonido;
 	
 	int handposx2, handposx1, handposx, handposy2, handposy1, handposy;
 	int fuerzax, fuerzay;
@@ -383,7 +384,7 @@ int game_loop (void) {
 		
 		thispuffle = first_puffle;
 		do {
-			if (thispuffle->y > 520) {
+			if (thispuffle->y > 530) {
 				/* Este puffle está perdido */
 				n_puffles--;
 				dropped_puffles++;
@@ -445,6 +446,12 @@ int game_loop (void) {
 			if (thispuffle->y > -99 && thispuffle->y_virtual >= 0) {
 				if ((thispuffle->x > handposx - 70 && thispuffle->x < handposx + 70) && ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) || (thispuffle->y > handposy && thispuffle->y < handposy2))) {
 					/* Bounce the puffle */
+					sonido = SND_SQUEAK1 + (int) (2.0 * rand () / (RAND_MAX + 1.0));
+					
+					if (fuerzax > 300 || fuerzax < -300 || poder > 30) {
+						sonido = SND_SQUEAK3;
+					}
+					
 					thispuffle->x_virtual = (thispuffle->x - (handposx + fuerzax)) / balance;
 					thispuffle->y_virtual = -1 * (speed + poder);
 					
@@ -456,10 +463,18 @@ int game_loop (void) {
 					/* TODO: Role and poptxt */
 					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
 					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
+					
+					if (use_sound) Mix_PlayChannel (-1, sounds[sonido], 0);
 				}
 				
 				if ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) && ((thispuffle->x > handposx && thispuffle->x < handposx2) || (thispuffle->x < handposx && thispuffle->x > handposx2))) {
 					/* Bounce the puffle */
+					sonido = SND_SQUEAK1 + (int) (2.0 * rand () / (RAND_MAX + 1.0));
+					
+					if (fuerzax > 300 || fuerzax < -300 || poder > 30) {
+						sonido = SND_SQUEAK3;
+					}
+					
 					thispuffle->x_virtual = (thispuffle->x - (handposx + fuerzax)) / balance;
 					thispuffle->y_virtual = -1 * (speed + poder);
 					
@@ -471,6 +486,8 @@ int game_loop (void) {
 					/* TODO: Role and poptxt */
 					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
 					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
+					
+					if (use_sound) Mix_PlayChannel (-1, sounds[sonido], 0);
 				}
 			}
 			

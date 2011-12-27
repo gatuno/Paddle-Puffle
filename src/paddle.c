@@ -37,6 +37,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 #define FPS (1000/24)
 
@@ -96,6 +97,28 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/puffle-blue-7.png",
 	GAMEDATA_DIR "images/puffle-blue-8.png"
 };
+
+enum {
+	SND_SQUEAK1,
+	SND_SQUEAK2,
+	SND_SQUEAK3,
+	SND_OLDBOING,
+	SND_OVER_TO_DOWN1,
+	SND_OVER_TO_DOWN2,
+	NUM_SOUNDS
+};
+
+const char *sound_names[NUM_SOUNDS] = {
+	GAMEDATA_DIR "sounds/squeak1.wav",
+	GAMEDATA_DIR "sounds/squeak2.wav",
+	GAMEDATA_DIR "sounds/squeak3.wav",
+	GAMEDATA_DIR "sounds/oldboing.wav",
+	GAMEDATA_DIR "sounds/over to down1.wav",
+	GAMEDATA_DIR "sounds/over to down2.wav",
+};
+
+#define MUS_CARNIE1 GAMEDATA_DIR "music/carnie1.mp3"
+#define MUS_CARNIE2 GAMEDATA_DIR "music/carnie2.mp3"
 
 /* Entrada 0 significa normal, 1 nuevo, 2 perdido */
 enum {
@@ -238,7 +261,11 @@ Puffle *first_puffle = NULL;
 Puffle *last_puffle = NULL;
 int num_rects;
 int background_frame = 0;
+int use_sound;
+int music_frame = 0;
 
+Mix_Chunk * sounds[NUM_SOUNDS];
+Mix_Music * mus_carnie1, * mus_carnie2;
 int main (int argc, char *argv[]) {
 	int done;
 	
@@ -272,6 +299,9 @@ int game_loop (void) {
 	
 	paddle_x = handposx2 = handposx1 = handposx;
 	paddle_y = handposy2 = handposy1 = handposy;
+	
+	/* Iniciar la música */
+	Mix_PlayMusic (mus_carnie1, 0);
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -351,7 +381,7 @@ int game_loop (void) {
 		
 		thispuffle = first_puffle;
 		do {
-			if (thispuffle->y > 500) {
+			if (thispuffle->y > 520) {
 				/* Este puffle está perdido */
 				n_puffles--;
 				dropped_puffles++;
@@ -465,6 +495,18 @@ int game_loop (void) {
 		
 		SDL_Flip (screen);
 		
+		if (use_sound) {
+			if (!Mix_PlayingMusic ()) {
+				if (music_frame == 0) {
+					Mix_PlayMusic (mus_carnie2, 0);
+					music_frame = 1;
+				} else {
+					Mix_PlayMusic (mus_carnie1, 0);
+					music_frame = 0;
+				}
+			}
+		}
+		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 		
@@ -507,6 +549,23 @@ void setup (void) {
 		exit (1);
 	}
 	
+	use_sound = 1;
+	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
+		fprintf (stdout,
+			"\nAdvertencia: No se pudo inicializar el sistema de audio\n"
+			"Continuando...\n\n");
+		use_sound = 0;
+	}
+	
+	if (use_sound) {
+		/* Inicializar el sonido */
+		if (Mix_OpenAudio (22050, AUDIO_S16, 2, 4096) < 0) {
+			fprintf (stdout,
+				"\nAdvertencia: <Poner un mensaje de error descriptivo>\n");
+			use_sound = 0;
+		}
+	}
+	
 	for (g = 0; g < NUM_IMAGES; g++) {
 		image = IMG_Load (images_names[g]);
 		
@@ -536,7 +595,45 @@ void setup (void) {
 	
 	/* TODO: Inicializar la TTF */
 	
-	/* TODO: Inicializar la música y cargar los sonidos */
+	if (use_sound) {
+		for (g = 0; g < NUM_SOUNDS; g++) {
+			sounds[g] = Mix_LoadWAV (sound_names [g]);
+			
+			if (sounds[g] == NULL) {
+				fprintf (stderr,
+					"\nError: No se pudo cargar un archivo de sonido:\n"
+					"%s\n"
+					"El error devuelto por SDL es:\n"
+					"%s\n\n", sound_names [g], SDL_GetError ());
+				exit (1);
+			}
+		}
+		
+		/* Cargar la música */
+		
+		mus_carnie1 = Mix_LoadMUS (MUS_CARNIE1);
+		
+		if (mus_carnie1 == NULL) {
+			fprintf (stderr,
+				"\nError: No se pudo cargar un archivo de sonido:\n"
+				"%s\n"
+				"El error devuelto por SDL es:\n"
+				"%s\n\n", MUS_CARNIE1, SDL_GetError ());
+			exit (1);
+		}
+		
+		mus_carnie2 = Mix_LoadMUS (MUS_CARNIE2);
+		
+		if (mus_carnie2 == NULL) {
+			fprintf (stderr,
+				"\nError: No se pudo cargar un archivo de sonido:\n"
+				"%s\n"
+				"El error devuelto por SDL es:\n"
+				"%s\n\n", MUS_CARNIE2, SDL_GetError ());
+			exit (1);
+		}
+		
+	}
 	
 	/* Generador de números aleatorios */
 	srand (SDL_GetTicks ());

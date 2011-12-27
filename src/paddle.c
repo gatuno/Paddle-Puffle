@@ -117,8 +117,7 @@ const char *sound_names[NUM_SOUNDS] = {
 	GAMEDATA_DIR "sounds/over to down2.wav",
 };
 
-#define MUS_CARNIE1 GAMEDATA_DIR "music/carnie1.mp3"
-#define MUS_CARNIE2 GAMEDATA_DIR "music/carnie2.mp3"
+#define MUS_CARNIE GAMEDATA_DIR "music/carnie.ogg"
 
 /* Entrada 0 significa normal, 1 nuevo, 2 perdido */
 enum {
@@ -262,10 +261,10 @@ Puffle *last_puffle = NULL;
 int num_rects;
 int background_frame = 0;
 int use_sound;
-int music_frame = 0;
 
 Mix_Chunk * sounds[NUM_SOUNDS];
-Mix_Music * mus_carnie1, * mus_carnie2;
+Mix_Music * mus_carnie;
+
 int main (int argc, char *argv[]) {
 	int done;
 	
@@ -301,7 +300,10 @@ int game_loop (void) {
 	paddle_y = handposy2 = handposy1 = handposy;
 	
 	/* Iniciar la música */
-	Mix_PlayMusic (mus_carnie1, 0);
+	if (use_sound) {
+		Mix_PlayMusic (mus_carnie, -1);
+	}
+	
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -495,18 +497,6 @@ int game_loop (void) {
 		
 		SDL_Flip (screen);
 		
-		if (use_sound) {
-			if (!Mix_PlayingMusic ()) {
-				if (music_frame == 0) {
-					Mix_PlayMusic (mus_carnie2, 0);
-					music_frame = 1;
-				} else {
-					Mix_PlayMusic (mus_carnie1, 0);
-					music_frame = 0;
-				}
-			}
-		}
-		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 		
@@ -611,25 +601,14 @@ void setup (void) {
 		
 		/* Cargar la música */
 		
-		mus_carnie1 = Mix_LoadMUS (MUS_CARNIE1);
+		mus_carnie = Mix_LoadMUS (MUS_CARNIE);
 		
-		if (mus_carnie1 == NULL) {
+		if (mus_carnie == NULL) {
 			fprintf (stderr,
 				"\nError: No se pudo cargar un archivo de sonido:\n"
 				"%s\n"
 				"El error devuelto por SDL es:\n"
-				"%s\n\n", MUS_CARNIE1, SDL_GetError ());
-			exit (1);
-		}
-		
-		mus_carnie2 = Mix_LoadMUS (MUS_CARNIE2);
-		
-		if (mus_carnie2 == NULL) {
-			fprintf (stderr,
-				"\nError: No se pudo cargar un archivo de sonido:\n"
-				"%s\n"
-				"El error devuelto por SDL es:\n"
-				"%s\n\n", MUS_CARNIE2, SDL_GetError ());
+				"%s\n\n", MUS_CARNIE, SDL_GetError ());
 			exit (1);
 		}
 		

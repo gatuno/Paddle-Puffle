@@ -283,18 +283,19 @@ int game_loop (void) {
 	SDL_Rect puf_pos;
 	int sonido;
 	
-	int handposx2, handposx1, handposx, handposy2, handposy1, handposy;
-	int fuerzax, fuerzay;
+	int handposx2, handposx1, handposx, handposy2, handposy1, handposy; /* Para calcular los desplazamientos del mouse */
+	int fuerzax, fuerzay; /* Calculos de fuerza al golpear el puffle */
 	float poder;
 	float speed = 10, balance = 4;
-	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0;
-	int goal = 20, default_goal = 20;
-	int score = 0, count = 0, bounces = 0;
+	int wind = 1, wind_countdown = 240; /* Para evitar puffles estancados verticalmente */
+	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0; /* Llevar la cantidad de puffles */
+	int count = 0, goal = 20, default_goal = 20; /* Para control de la generación de próximos puffles */
+	int bounces = 0; /* Bounces, golpes totales */
 	int paddle_x, paddle_y, paddle_frame = 0;
 	Puffle *thispuffle;
 	
 	nuevo_puffle ();
-	
+	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_GetMouseState (&handposx, &handposy);
 	
 	paddle_x = handposx2 = handposx1 = handposx;
@@ -312,6 +313,7 @@ int game_loop (void) {
 		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
 		
 		while (SDL_PollEvent(&event) > 0) {
+			/* fprintf (stdout, "Evento: %i\n", event.type);*/
 			switch (event.type) {
 				case SDL_QUIT:
 					/* Vamos a cerrar la aplicación */
@@ -326,11 +328,20 @@ int game_loop (void) {
 					key = event.key.keysym.sym;
 					
 					if (key == SDLK_z) {
+						fprintf (stderr, "Sending new background\n");
 						background_frame = background_frames [background_frame][BACKGROUND_NEW];
 					} else if (key == SDLK_x) {
+						fprintf (stderr, "Sending fail background\n");
 						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
 					}
 					
+					if (key == SDLK_q) {
+						fprintf (stderr, "Bounces = 60, activando wind\n");
+						bounces = 60; /* Debug key */
+					} else if (key == SDLK_w) {
+						fprintf (stderr, "Bounces = 0, desactivando wind\n");
+						bounces = 0;
+					}
 					/* TODO: Toggle Fullscreen */
 					break;
 				/*case SDL_VIDEOEXPOSE:
@@ -410,6 +421,7 @@ int game_loop (void) {
 		
 		if (first_puffle == NULL) {
 			done = 1;
+			/* TODO: Fin del juego, todos los puffles perdidos */
 			break;
 		}
 		
@@ -432,7 +444,7 @@ int game_loop (void) {
 			thispuffle->y = thispuffle->y + thispuffle->y_virtual;
 			
 			if (thispuffle->x >= 720 && thispuffle->x_virtual >= 0) thispuffle->x_virtual *= -1;
-			if (thispuffle->x <= 40 && thispuffle->x_virtual < 0) thispuffle->x_virtual *= -1;
+			else if (thispuffle->x <= 40 && thispuffle->x_virtual < 0) thispuffle->x_virtual *= -1;
 			
 			if (thispuffle->y_virtual < -10) thispuffle->y_virtual *= 0.9;
 			else thispuffle->y_virtual += 1; /* 1 de "Gravity" */
@@ -441,7 +453,19 @@ int game_loop (void) {
 				thispuffle->x_virtual *= 0.95;
 			}
 			
-			/* Score & windcount */
+			/* Si tiene un score (alias bounces) mayor a 50, aplicar un poco de viento */
+			if (bounces > 50) { /* Bounces ajustado a 25, valor original 50 */
+				if (wind) thispuffle->x_virtual += 0.1;
+				else thispuffle->x_virtual -= 0.1;
+				
+				if (wind_countdown > 0) wind_countdown--;
+			}
+			
+			if (wind_countdown == 0) {
+				if (wind) wind = 0;
+				else wind = 1;
+				wind_countdown = 240;
+			}		
 			
 			if (thispuffle->y > -99 && thispuffle->y_virtual >= 0) {
 				if ((thispuffle->x > handposx - 70 && thispuffle->x < handposx + 70) && ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) || (thispuffle->y > handposy && thispuffle->y < handposy2))) {
@@ -455,12 +479,13 @@ int game_loop (void) {
 					thispuffle->x_virtual = (thispuffle->x - (handposx + fuerzax)) / balance;
 					thispuffle->y_virtual = -1 * (speed + poder);
 					
-					score++; bounces++; count++;
+					bounces++; count++;
 					
 					if (speed < 40) speed += 0.2;
 					else if (balance > 2) balance -= 0.2;
 					
 					/* TODO: Role and poptxt */
+					thispuffle->pop_num++;
 					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
 					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
 					
@@ -478,12 +503,13 @@ int game_loop (void) {
 					thispuffle->x_virtual = (thispuffle->x - (handposx + fuerzax)) / balance;
 					thispuffle->y_virtual = -1 * (speed + poder);
 					
-					score++; bounces++; count++;
+					bounces++; count++;
 					
 					if (speed < 40) speed += 0.2;
 					else if (balance > 2) balance -= 0.2;
 					
 					/* TODO: Role and poptxt */
+					thispuffle->pop_num++;
 					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
 					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
 					
@@ -512,6 +538,9 @@ int game_loop (void) {
 		/* Avanzar el escenario */
 		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
 		
+		/* Dibujar el botón de cierre */
+		/*puf_pos.x = 720; puf_pos.y = 8;
+		puf*/
 		SDL_Flip (screen);
 		
 		now_time = SDL_GetTicks ();

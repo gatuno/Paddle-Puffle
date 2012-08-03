@@ -53,6 +53,10 @@ enum {
 	IMG_BACKGROUND_FAIL_0,
 	IMG_BACKGROUND_FAIL_1,
 	
+	IMG_CLOSE_BUTTON_UP,
+	IMG_CLOSE_BUTTON_OVER,
+	IMG_CLOSE_BUTTON_DOWN,
+	
 	IMG_PADDLE_1,
 	IMG_PADDLE_2,
 	IMG_PADDLE_3,
@@ -82,6 +86,10 @@ const char *images_names[NUM_IMAGES] = {
 	
 	GAMEDATA_DIR "images/fail-0.png",
 	GAMEDATA_DIR "images/fail-1.png",
+	
+	GAMEDATA_DIR "images/botonup.png",
+	GAMEDATA_DIR "images/botonover.png",
+	GAMEDATA_DIR "images/botondown.png",
 	
 	GAMEDATA_DIR "images/paddle-1.png",
 	GAMEDATA_DIR "images/paddle-2.png",
@@ -233,6 +241,13 @@ static int paddle_outputs [5] = {
 	IMG_PADDLE_4
 };
 
+/* Para verificar los botones */
+enum {
+	BUTTON_NONE = 0,
+	BUTTON_CLOSE,
+	BUTTON_CLOSE_2
+};
+
 /* La estructura principal de un puffle */
 typedef struct _Puffle{
 	struct _Puffle *next;
@@ -275,6 +290,13 @@ int main (int argc, char *argv[]) {
 	return 0;
 }
 
+inline int map_button (int x, int y) {
+	/* Checar por el botón de cierre */
+	if (x >= 710 && x < 739 && y >= 10 && y < 39) return BUTTON_CLOSE;
+	if (x >= 710 && x < 739 && y >= 50 && y < 79) return BUTTON_CLOSE_2;
+	return BUTTON_NONE;
+}
+
 int game_loop (void) {
 	int done = 0;
 	SDL_Event event;
@@ -282,6 +304,7 @@ int game_loop (void) {
 	Uint32 last_time, now_time;
 	SDL_Rect puf_pos;
 	int sonido;
+	int last_button = 0, button_frame;
 	
 	int handposx2, handposx1, handposx, handposy2, handposy1, handposy; /* Para calcular los desplazamientos del mouse */
 	int fuerzax, fuerzay; /* Calculos de fuerza al golpear el puffle */
@@ -321,7 +344,27 @@ int game_loop (void) {
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					/* Tengo un Mouse Down */
-					
+					if (event.button.button != SDL_BUTTON_LEFT) break;
+					if (last_button == BUTTON_NONE) last_button = map_button (event.button.x, event.button.y);
+					fprintf (stderr, "Mouse down\n");
+					break;
+				case SDL_MOUSEBUTTONUP:
+					/* Tengo un mouse Up */
+					if (event.button.button != SDL_BUTTON_LEFT) break;
+					fprintf (stderr, "Mouse Up\n");
+					if (last_button != BUTTON_NONE) {
+						if (map_button (event.button.x, event.button.y) == last_button) {
+							/* Mouse down y mouse up sobre el mismo botón */
+							/* Utilizar switch para muchos botones */
+							if (last_button == BUTTON_CLOSE) {
+								//done = 1;
+								fprintf (stdout, "Boton 1 presionado\n");
+							} else if (last_button == BUTTON_CLOSE_2) {
+								fprintf (stdout, "Boton 2 presionado\n");
+							}
+						}
+						last_button = BUTTON_NONE;
+					}
 					break;
 				case SDL_KEYDOWN:
 					/* Tengo una tecla presionada */
@@ -438,10 +481,40 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
 		
+		/* Dibujar el botón de cierre */
+		/* 710, 24 */
+		puf_pos.x = 710; puf_pos.y = 10;
+		if (last_button == BUTTON_CLOSE && map_button (handposx, handposy) == BUTTON_CLOSE) {
+			/* Está presionado el botón del mouse, y está sobre el botón */
+			button_frame = IMG_CLOSE_BUTTON_DOWN;
+		} else if (last_button == BUTTON_CLOSE) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else if (last_button == BUTTON_NONE && map_button (handposx, handposy) == BUTTON_CLOSE) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else {
+			button_frame = IMG_CLOSE_BUTTON_UP;
+		}
+		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
+		
+		/* Dibujar OTRO botón de cierre */
+		/* 710, 50 */
+		puf_pos.x = 710; puf_pos.y = 50;
+		if (last_button == BUTTON_CLOSE_2 && map_button (handposx, handposy) == BUTTON_CLOSE_2) {
+			/* Está presionado el botón del mouse, y está sobre el botón */
+			button_frame = IMG_CLOSE_BUTTON_DOWN;
+		} else if (last_button == BUTTON_CLOSE_2) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else if (last_button == BUTTON_NONE && map_button (handposx, handposy) == BUTTON_CLOSE_2) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else {
+			button_frame = IMG_CLOSE_BUTTON_UP;
+		}
+		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
+			
 		thispuffle = first_puffle;
 		do {
 			thispuffle->x = thispuffle->x + thispuffle->x_virtual;
-			thispuffle->y = thispuffle->y + thispuffle->y_virtual;
+			/* thispuffle->y = thispuffle->y + thispuffle->y_virtual;*/
 			
 			if (thispuffle->x >= 720 && thispuffle->x_virtual >= 0) thispuffle->x_virtual *= -1;
 			else if (thispuffle->x <= 40 && thispuffle->x_virtual < 0) thispuffle->x_virtual *= -1;
@@ -538,9 +611,6 @@ int game_loop (void) {
 		/* Avanzar el escenario */
 		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
 		
-		/* Dibujar el botón de cierre */
-		/*puf_pos.x = 720; puf_pos.y = 8;
-		puf*/
 		SDL_Flip (screen);
 		
 		now_time = SDL_GetTicks ();
@@ -673,7 +743,7 @@ void nuevo_puffle (void) {
 	new->frame = 0;
 	new->x_virtual = new->y_virtual = new->pop_num = 0;
 	
-	new->y = -40;
+	new->y = 40;
 	new->x = 20 + (int) (720.0 * rand () / (RAND_MAX + 1.0));
 	
 	/* Ahora sus campos para lista doble ligada */

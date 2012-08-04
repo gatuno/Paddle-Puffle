@@ -244,8 +244,7 @@ static int paddle_outputs [5] = {
 /* Para verificar los botones */
 enum {
 	BUTTON_NONE = 0,
-	BUTTON_CLOSE,
-	BUTTON_CLOSE_2
+	BUTTON_CLOSE
 };
 
 /* La estructura principal de un puffle */
@@ -267,6 +266,7 @@ void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
 void nuevo_puffle (void);
 void eliminar_puffle (Puffle *p);
+int map_button_in_game (int x, int y);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -287,14 +287,8 @@ int main (int argc, char *argv[]) {
 	
 	done = game_loop ();
 	
+	SDL_Quit ();
 	return 0;
-}
-
-inline int map_button (int x, int y) {
-	/* Checar por el botón de cierre */
-	if (x >= 710 && x < 739 && y >= 10 && y < 39) return BUTTON_CLOSE;
-	if (x >= 710 && x < 739 && y >= 50 && y < 79) return BUTTON_CLOSE_2;
-	return BUTTON_NONE;
 }
 
 int game_loop (void) {
@@ -345,22 +339,17 @@ int game_loop (void) {
 				case SDL_MOUSEBUTTONDOWN:
 					/* Tengo un Mouse Down */
 					if (event.button.button != SDL_BUTTON_LEFT) break;
-					if (last_button == BUTTON_NONE) last_button = map_button (event.button.x, event.button.y);
-					fprintf (stderr, "Mouse down\n");
+					if (last_button == BUTTON_NONE) last_button = map_button_in_game (event.button.x, event.button.y);
 					break;
 				case SDL_MOUSEBUTTONUP:
 					/* Tengo un mouse Up */
 					if (event.button.button != SDL_BUTTON_LEFT) break;
-					fprintf (stderr, "Mouse Up\n");
 					if (last_button != BUTTON_NONE) {
-						if (map_button (event.button.x, event.button.y) == last_button) {
+						if (map_button_in_game (event.button.x, event.button.y) == last_button) {
 							/* Mouse down y mouse up sobre el mismo botón */
 							/* Utilizar switch para muchos botones */
 							if (last_button == BUTTON_CLOSE) {
-								//done = 1;
-								fprintf (stdout, "Boton 1 presionado\n");
-							} else if (last_button == BUTTON_CLOSE_2) {
-								fprintf (stdout, "Boton 2 presionado\n");
+								done = 1;
 							}
 							button_pressed = last_button;
 						}
@@ -483,31 +472,16 @@ int game_loop (void) {
 		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
 		
 		/* Dibujar el botón de cierre */
-		/* 710, 24 */
-		puf_pos.x = 710; puf_pos.y = 10;
-		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button (handposx, handposy) == BUTTON_CLOSE)) {
+		/* Posición original X:734, Y:22
+		 * Centro +- 14.05 */
+		puf_pos.x = 720; puf_pos.y = 8;
+		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE)) {
 			/* Está presionado el botón del mouse, y está sobre el botón */
 			button_frame = IMG_CLOSE_BUTTON_DOWN;
 			button_pressed = BUTTON_NONE;
 		} else if (last_button == BUTTON_CLOSE) {
 			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else if (last_button == BUTTON_NONE && map_button (handposx, handposy) == BUTTON_CLOSE) {
-			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else {
-			button_frame = IMG_CLOSE_BUTTON_UP;
-		}
-		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
-		
-		/* Dibujar OTRO botón de cierre */
-		/* 710, 50 */
-		puf_pos.x = 710; puf_pos.y = 50;
-		if (button_pressed == BUTTON_CLOSE_2 || (last_button == BUTTON_CLOSE_2 && map_button (handposx, handposy) == BUTTON_CLOSE_2)) {
-			/* Está presionado el botón del mouse, y está sobre el botón */
-			button_frame = IMG_CLOSE_BUTTON_DOWN;
-			button_pressed = BUTTON_NON1E;
-		} else if (last_button == BUTTON_CLOSE_2) {
-			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else if (last_button == BUTTON_NONE && map_button (handposx, handposy) == BUTTON_CLOSE_2) {
+		} else if (last_button == BUTTON_NONE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE) {
 			button_frame = IMG_CLOSE_BUTTON_OVER;
 		} else {
 			button_frame = IMG_CLOSE_BUTTON_UP;
@@ -517,7 +491,7 @@ int game_loop (void) {
 		thispuffle = first_puffle;
 		do {
 			thispuffle->x = thispuffle->x + thispuffle->x_virtual;
-			/* thispuffle->y = thispuffle->y + thispuffle->y_virtual;*/
+			thispuffle->y = thispuffle->y + thispuffle->y_virtual;
 			
 			if (thispuffle->x >= 720 && thispuffle->x_virtual >= 0) thispuffle->x_virtual *= -1;
 			else if (thispuffle->x <= 40 && thispuffle->x_virtual < 0) thispuffle->x_virtual *= -1;
@@ -746,7 +720,7 @@ void nuevo_puffle (void) {
 	new->frame = 0;
 	new->x_virtual = new->y_virtual = new->pop_num = 0;
 	
-	new->y = 40;
+	new->y = -40;
 	new->x = 20 + (int) (720.0 * rand () / (RAND_MAX + 1.0));
 	
 	/* Ahora sus campos para lista doble ligada */
@@ -785,3 +759,8 @@ void eliminar_puffle (Puffle *p) {
 	background_frame = background_frames [background_frame][BACKGROUND_FAIL];
 }
 
+inline int map_button_in_game (int x, int y) {
+	/* Checar por el botón de cierre */
+	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
+	return BUTTON_NONE;
+}

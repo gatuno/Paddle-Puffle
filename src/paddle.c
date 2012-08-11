@@ -71,6 +71,87 @@ enum {
 	IMG_BLUE_BOUNCE_3,
 	IMG_BLUE_BOUNCE_4,
 	
+	IMG_PINK_NORMAL_1,
+	IMG_PINK_FALL_1,
+	IMG_PINK_FALL_2,
+	IMG_PINK_FALL_3,
+	IMG_PINK_BOUNCE_1,
+	IMG_PINK_BOUNCE_2,
+	IMG_PINK_BOUNCE_3,
+	IMG_PINK_BOUNCE_4,
+	
+	IMG_BLACK_NORMAL_1,
+	IMG_BLACK_FALL_1,
+	IMG_BLACK_FALL_2,
+	IMG_BLACK_FALL_3,
+	IMG_BLACK_BOUNCE_1,
+	IMG_BLACK_BOUNCE_2,
+	IMG_BLACK_BOUNCE_3,
+	IMG_BLACK_BOUNCE_4,
+	
+	IMG_GREEN_NORMAL_1,
+	IMG_GREEN_FALL_1,
+	IMG_GREEN_FALL_2,
+	IMG_GREEN_FALL_3,
+	IMG_GREEN_BOUNCE_1,
+	IMG_GREEN_BOUNCE_2,
+	IMG_GREEN_BOUNCE_3,
+	IMG_GREEN_BOUNCE_4,
+	
+	IMG_PURPLE_NORMAL_1,
+	IMG_PURPLE_FALL_1,
+	IMG_PURPLE_FALL_2,
+	IMG_PURPLE_FALL_3,
+	IMG_PURPLE_BOUNCE_1,
+	IMG_PURPLE_BOUNCE_2,
+	IMG_PURPLE_BOUNCE_3,
+	IMG_PURPLE_BOUNCE_4,
+	
+	IMG_RED_NORMAL_1,
+	IMG_RED_FALL_1,
+	IMG_RED_FALL_2,
+	IMG_RED_FALL_3,
+	IMG_RED_BOUNCE_1,
+	IMG_RED_BOUNCE_2,
+	IMG_RED_BOUNCE_3,
+	IMG_RED_BOUNCE_4,
+	
+	IMG_YELLOW_NORMAL_1,
+	IMG_YELLOW_FALL_1,
+	IMG_YELLOW_FALL_2,
+	IMG_YELLOW_FALL_3,
+	IMG_YELLOW_BOUNCE_1,
+	IMG_YELLOW_BOUNCE_2,
+	IMG_YELLOW_BOUNCE_3,
+	IMG_YELLOW_BOUNCE_4,
+	
+	IMG_WHITE_NORMAL_1,
+	IMG_WHITE_FALL_1,
+	IMG_WHITE_FALL_2,
+	IMG_WHITE_FALL_3,
+	IMG_WHITE_BOUNCE_1,
+	IMG_WHITE_BOUNCE_2,
+	IMG_WHITE_BOUNCE_3,
+	IMG_WHITE_BOUNCE_4,
+	
+	IMG_ORANGE_NORMAL_1,
+	IMG_ORANGE_FALL_1,
+	IMG_ORANGE_FALL_2,
+	IMG_ORANGE_FALL_3,
+	IMG_ORANGE_BOUNCE_1,
+	IMG_ORANGE_BOUNCE_2,
+	IMG_ORANGE_BOUNCE_3,
+	IMG_ORANGE_BOUNCE_4,
+	
+	IMG_BROWN_NORMAL_1,
+	IMG_BROWN_FALL_1,
+	IMG_BROWN_FALL_2,
+	IMG_BROWN_FALL_3,
+	IMG_BROWN_BOUNCE_1,
+	IMG_BROWN_BOUNCE_2,
+	IMG_BROWN_BOUNCE_3,
+	IMG_BROWN_BOUNCE_4,
+	
 	NUM_IMAGES
 };
 
@@ -103,7 +184,88 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/puffle-blue-5.png",
 	GAMEDATA_DIR "images/puffle-blue-6.png",
 	GAMEDATA_DIR "images/puffle-blue-7.png",
-	GAMEDATA_DIR "images/puffle-blue-8.png"
+	GAMEDATA_DIR "images/puffle-blue-8.png",
+	
+	GAMEDATA_DIR "images/puffle-pink-1.png",
+	GAMEDATA_DIR "images/puffle-pink-2.png",
+	GAMEDATA_DIR "images/puffle-pink-3.png",
+	GAMEDATA_DIR "images/puffle-pink-4.png",
+	GAMEDATA_DIR "images/puffle-pink-5.png",
+	GAMEDATA_DIR "images/puffle-pink-6.png",
+	GAMEDATA_DIR "images/puffle-pink-7.png",
+	GAMEDATA_DIR "images/puffle-pink-8.png",
+	
+	GAMEDATA_DIR "images/puffle-black-1.png",
+	GAMEDATA_DIR "images/puffle-black-2.png",
+	GAMEDATA_DIR "images/puffle-black-3.png",
+	GAMEDATA_DIR "images/puffle-black-4.png",
+	GAMEDATA_DIR "images/puffle-black-5.png",
+	GAMEDATA_DIR "images/puffle-black-6.png",
+	GAMEDATA_DIR "images/puffle-black-7.png",
+	GAMEDATA_DIR "images/puffle-black-8.png",
+	
+	GAMEDATA_DIR "images/puffle-green-1.png",
+	GAMEDATA_DIR "images/puffle-green-2.png",
+	GAMEDATA_DIR "images/puffle-green-3.png",
+	GAMEDATA_DIR "images/puffle-green-4.png",
+	GAMEDATA_DIR "images/puffle-green-5.png",
+	GAMEDATA_DIR "images/puffle-green-6.png",
+	GAMEDATA_DIR "images/puffle-green-7.png",
+	GAMEDATA_DIR "images/puffle-green-8.png",
+	
+	GAMEDATA_DIR "images/puffle-purple-1.png",
+	GAMEDATA_DIR "images/puffle-purple-2.png",
+	GAMEDATA_DIR "images/puffle-purple-3.png",
+	GAMEDATA_DIR "images/puffle-purple-4.png",
+	GAMEDATA_DIR "images/puffle-purple-5.png",
+	GAMEDATA_DIR "images/puffle-purple-6.png",
+	GAMEDATA_DIR "images/puffle-purple-7.png",
+	GAMEDATA_DIR "images/puffle-purple-8.png",
+	
+	GAMEDATA_DIR "images/puffle-red-1.png",
+	GAMEDATA_DIR "images/puffle-red-2.png",
+	GAMEDATA_DIR "images/puffle-red-3.png",
+	GAMEDATA_DIR "images/puffle-red-4.png",
+	GAMEDATA_DIR "images/puffle-red-5.png",
+	GAMEDATA_DIR "images/puffle-red-6.png",
+	GAMEDATA_DIR "images/puffle-red-7.png",
+	GAMEDATA_DIR "images/puffle-red-8.png",
+	
+	GAMEDATA_DIR "images/puffle-yellow-1.png",
+	GAMEDATA_DIR "images/puffle-yellow-2.png",
+	GAMEDATA_DIR "images/puffle-yellow-3.png",
+	GAMEDATA_DIR "images/puffle-yellow-4.png",
+	GAMEDATA_DIR "images/puffle-yellow-5.png",
+	GAMEDATA_DIR "images/puffle-yellow-6.png",
+	GAMEDATA_DIR "images/puffle-yellow-7.png",
+	GAMEDATA_DIR "images/puffle-yellow-8.png",
+	
+	GAMEDATA_DIR "images/puffle-white-1.png",
+	GAMEDATA_DIR "images/puffle-white-2.png",
+	GAMEDATA_DIR "images/puffle-white-3.png",
+	GAMEDATA_DIR "images/puffle-white-4.png",
+	GAMEDATA_DIR "images/puffle-white-5.png",
+	GAMEDATA_DIR "images/puffle-white-6.png",
+	GAMEDATA_DIR "images/puffle-white-7.png",
+	GAMEDATA_DIR "images/puffle-white-8.png",
+	
+	GAMEDATA_DIR "images/puffle-orange-1.png",
+	GAMEDATA_DIR "images/puffle-orange-2.png",
+	GAMEDATA_DIR "images/puffle-orange-3.png",
+	GAMEDATA_DIR "images/puffle-orange-4.png",
+	GAMEDATA_DIR "images/puffle-orange-5.png",
+	GAMEDATA_DIR "images/puffle-orange-6.png",
+	GAMEDATA_DIR "images/puffle-orange-7.png",
+	GAMEDATA_DIR "images/puffle-orange-8.png",
+	
+	GAMEDATA_DIR "images/puffle-brown-1.png",
+	GAMEDATA_DIR "images/puffle-brown-2.png",
+	GAMEDATA_DIR "images/puffle-brown-3.png",
+	GAMEDATA_DIR "images/puffle-brown-4.png",
+	GAMEDATA_DIR "images/puffle-brown-5.png",
+	GAMEDATA_DIR "images/puffle-brown-6.png",
+	GAMEDATA_DIR "images/puffle-brown-7.png",
+	GAMEDATA_DIR "images/puffle-brown-8.png"
 };
 
 enum {
@@ -583,7 +745,7 @@ int game_loop (void) {
 				puf_pos.y = thispuffle->y - 60; /* Constante temporal */
 				puf_pos.w = images [puffle_outputs [thispuffle->frame]]->w;
 				puf_pos.h = images [puffle_outputs [thispuffle->frame]]->h;
-				SDL_BlitSurface (images [puffle_outputs [thispuffle->frame]], NULL, screen, &puf_pos);
+				SDL_BlitSurface (images [puffle_outputs [thispuffle->frame] + (thispuffle->color * 8)], NULL, screen, &puf_pos);
 			}
 			
 			if (thispuffle != NULL) thispuffle = thispuffle->next;
@@ -717,10 +879,12 @@ void setup (void) {
 
 void nuevo_puffle (void) {
 	Puffle *new;
+	static color = 0;
 	new = (Puffle *) malloc (sizeof (Puffle));
 	
 	/* Inicializar el Puffle */
-	new->color = 0; /* TODO: Cambiar el color */
+	new->color = color++;
+	if (color >= 10) color = 0;
 	new->frame = 0;
 	new->x_virtual = new->y_virtual = new->pop_num = 0;
 	

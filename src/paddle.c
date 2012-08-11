@@ -458,36 +458,6 @@ int game_loop (void) {
 			break;
 		}
 		
-		paddle_x = handposx;
-		paddle_y = handposy;
-		
-		paddle_frame = paddle_frames[paddle_frame][PADDLE_NORMAL];
-		
-		/* Blit el paddle */
-		puf_pos.x = paddle_x - (images [paddle_outputs [paddle_frame]]->w / 2);
-		puf_pos.y = paddle_y - (images [paddle_outputs [paddle_frame]]->h / 2);
-		puf_pos.h = images [paddle_outputs [paddle_frame]]->h;
-		puf_pos.w = images [paddle_outputs [paddle_frame]]->w;
-		
-		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
-		
-		/* Dibujar el botón de cierre */
-		/* Posición original X:734, Y:22
-		 * Centro +- 14.05 */
-		puf_pos.x = 720; puf_pos.y = 8;
-		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE)) {
-			/* Está presionado el botón del mouse, y está sobre el botón */
-			button_frame = IMG_CLOSE_BUTTON_DOWN;
-			button_pressed = BUTTON_NONE;
-		} else if (last_button == BUTTON_CLOSE) {
-			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else if (last_button == BUTTON_NONE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE) {
-			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else {
-			button_frame = IMG_CLOSE_BUTTON_UP;
-		}
-		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
-			
 		thispuffle = first_puffle;
 		do {
 			thispuffle->x = thispuffle->x + thispuffle->x_virtual;
@@ -567,16 +537,50 @@ int game_loop (void) {
 				}
 			}
 			
-			if (thispuffle->y_virtual > 6) {
+			if (thispuffle->y_virtual > 10) {
 				thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_FALL];
 			}
 			
 			thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_NORMAL];
+			if (thispuffle != NULL) thispuffle = thispuffle->next;
+		} while (thispuffle != NULL);
+		
+		paddle_x = handposx;
+		paddle_y = handposy;
+		
+		paddle_frame = paddle_frames[paddle_frame][PADDLE_NORMAL];
+		
+		/* Blit el paddle */
+		puf_pos.x = paddle_x - 58; /* Constante temporal */
+		puf_pos.y = paddle_y - 70; /* Constante temporal */
+		puf_pos.h = images [paddle_outputs [paddle_frame]]->h;
+		puf_pos.w = images [paddle_outputs [paddle_frame]]->w;
+		
+		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
+		
+		/* Dibujar el botón de cierre */
+		/* Posición original X:734, Y:22
+		 * Centro +- 14.05 */
+		puf_pos.x = 720; puf_pos.y = 8;
+		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE)) {
+			/* Está presionado el botón del mouse, y está sobre el botón */
+			button_frame = IMG_CLOSE_BUTTON_DOWN;
+			button_pressed = BUTTON_NONE;
+		} else if (last_button == BUTTON_CLOSE) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else if (last_button == BUTTON_NONE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else {
+			button_frame = IMG_CLOSE_BUTTON_UP;
+		}
+		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
 			
+		thispuffle = first_puffle;
+		do {
 			if (thispuffle->y > -100) {
 				/* Blit this puffle */
-				puf_pos.x = thispuffle->x - (images [puffle_outputs [thispuffle->frame]]->w / 2);
-				puf_pos.y = thispuffle->y - images [puffle_outputs [thispuffle->frame]]->h;
+				puf_pos.x = thispuffle->x - 48; /* Constante temporal */
+				puf_pos.y = thispuffle->y - 60; /* Constante temporal */
 				puf_pos.w = images [puffle_outputs [thispuffle->frame]]->w;
 				puf_pos.h = images [puffle_outputs [thispuffle->frame]]->h;
 				SDL_BlitSurface (images [puffle_outputs [thispuffle->frame]], NULL, screen, &puf_pos);

@@ -93,6 +93,7 @@ nobase_dist_gamedata_DATA = images/fail-0.png \
 	images/puffle-brown-7.png \
 	images/puffle-brown-8.png \
 	images/title.png \
+	images/title-opening.png \
 	music/carnie.ogg \
 	sounds/oldboing.wav \
 	sounds/overtodown1.wav \

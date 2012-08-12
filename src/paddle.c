@@ -45,11 +45,11 @@
 enum {
 	IMG_TITLE,
 	
-	IMG_BACKGROUND_NORMAL,
+	IMG_TITLE_OPENING,
 	
+	IMG_BACKGROUND_NORMAL,
 	IMG_BACKGROUND_NEW_0,
 	IMG_BACKGROUND_NEW_1,
-	
 	IMG_BACKGROUND_FAIL_0,
 	IMG_BACKGROUND_FAIL_1,
 	
@@ -160,11 +160,11 @@ enum {
 const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/title.png",
 	
-	GAMEDATA_DIR "images/normal.png",
+	GAMEDATA_DIR "images/title-opening.png",
 	
+	GAMEDATA_DIR "images/normal.png",
 	GAMEDATA_DIR "images/new-0.png",
 	GAMEDATA_DIR "images/new-1.png",
-	
 	GAMEDATA_DIR "images/fail-0.png",
 	GAMEDATA_DIR "images/fail-1.png",
 	
@@ -409,6 +409,13 @@ enum {
 	BUTTON_CLOSE
 };
 
+/* Codigos de salida */
+enum {
+	GAME_NONE = 0, /* No usado */
+	GAME_CONTINUE,
+	GAME_QUIT
+};
+
 /* La estructura principal de un puffle */
 typedef struct _Puffle{
 	struct _Puffle *next;
@@ -423,6 +430,7 @@ typedef struct _Puffle{
 } Puffle;
 
 /* Prototipos de función */
+int game_intro (void);
 int game_loop (void);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
@@ -438,19 +446,110 @@ Puffle *last_puffle = NULL;
 int num_rects;
 int background_frame = 0;
 int use_sound;
+SDL_Surface *grey_screen;
 
 Mix_Chunk * sounds[NUM_SOUNDS];
 Mix_Music * mus_carnie;
 
 int main (int argc, char *argv[]) {
-	int done;
-	
 	setup ();
-	
-	done = game_loop ();
+	do {
+		if (game_intro () == GAME_QUIT) break;
+		if (game_loop () == GAME_QUIT) break;
+		/* TODO: Pantalla de "gracias por jugar */
+	} while (1 == 0);
 	
 	SDL_Quit ();
-	return 0;
+	return EXIT_SUCCESS;
+}
+
+int game_intro (void) {
+	int done;
+	SDL_Event event;
+	SDLKey key;
+	SDL_Rect dest_rect;
+	Uint32 last_time, now_time;
+	int last_button = 0, button_frame, button_pressed;
+	int handposx, handposy;
+	
+	/* Iniciar la música */
+	if (use_sound) {
+		Mix_PlayMusic (mus_carnie, -1);
+	}
+	
+	SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], NULL, screen, NULL);
+	
+	SDL_BlitSurface (grey_screen, NULL, screen, NULL);
+	
+	dest_rect.x = 107;
+	dest_rect.y = 17;
+	dest_rect.h = images [IMG_TITLE_OPENING]->h;
+	dest_rect.w = images [IMG_TITLE_OPENING]->w;
+	
+	SDL_BlitSurface (images [IMG_TITLE_OPENING], NULL, screen, &dest_rect);
+	
+	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
+	
+	do {
+		last_time = SDL_GetTicks ();
+		
+		while (SDL_PollEvent(&event) > 0) {
+			/* fprintf (stdout, "Evento: %i\n", event.type);*/
+			switch (event.type) {
+				case SDL_QUIT:
+					/* Vamos a cerrar la aplicación */
+					done = GAME_QUIT;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					/* Tengo un Mouse Down */
+					if (event.button.button == SDL_BUTTON_RIGHT) done = GAME_CONTINUE;
+					if (event.button.button != SDL_BUTTON_LEFT) break;
+					if (last_button == BUTTON_NONE) last_button = map_button_in_game (event.button.x, event.button.y);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					/* Tengo un mouse Up */
+					if (event.button.button != SDL_BUTTON_LEFT) break;
+					if (last_button != BUTTON_NONE) {
+						if (map_button_in_game (event.button.x, event.button.y) == last_button) {
+							/* Mouse down y mouse up sobre el mismo botón */
+							/* Utilizar switch para muchos botones */
+							if (last_button == BUTTON_CLOSE) {
+								done = GAME_QUIT;
+							}
+							button_pressed = last_button;
+						}
+						last_button = BUTTON_NONE;
+					}
+					break;
+			}
+		}
+		
+		SDL_GetMouseState (&handposx, &handposy);
+		/* Dibujar el botón de cierre */
+		/* Posición original X:734, Y:22
+		 * Centro +- 14.05 */
+		dest_rect.x = 720; dest_rect.y = 8; dest_rect.h = images[button_frame]->h; dest_rect.w = images[button_frame]->w;
+		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE)) {
+			/* Está presionado el botón del mouse, y está sobre el botón */
+			button_frame = IMG_CLOSE_BUTTON_DOWN;
+			button_pressed = BUTTON_NONE;
+		} else if (last_button == BUTTON_CLOSE) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else if (last_button == BUTTON_NONE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE) {
+			button_frame = IMG_CLOSE_BUTTON_OVER;
+		} else {
+			button_frame = IMG_CLOSE_BUTTON_UP;
+		}
+		SDL_BlitSurface (images[button_frame], NULL, screen, &dest_rect);
+		
+		SDL_Flip (screen);
+		
+		now_time = SDL_GetTicks ();
+		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
+		
+	} while (!done);
+	
+	return done;
 }
 
 int game_loop (void) {
@@ -480,12 +579,6 @@ int game_loop (void) {
 	paddle_x = handposx2 = handposx1 = handposx;
 	paddle_y = handposy2 = handposy1 = handposy;
 	
-	/* Iniciar la música */
-	if (use_sound) {
-		Mix_PlayMusic (mus_carnie, -1);
-	}
-	
-	
 	do {
 		last_time = SDL_GetTicks ();
 		
@@ -496,7 +589,7 @@ int game_loop (void) {
 			switch (event.type) {
 				case SDL_QUIT:
 					/* Vamos a cerrar la aplicación */
-					done = 1;
+					done = GAME_QUIT;
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					/* Tengo un Mouse Down */
@@ -511,7 +604,7 @@ int game_loop (void) {
 							/* Mouse down y mouse up sobre el mismo botón */
 							/* Utilizar switch para muchos botones */
 							if (last_button == BUTTON_CLOSE) {
-								done = 1;
+								done = GAME_QUIT;
 							}
 							button_pressed = last_button;
 						}
@@ -615,7 +708,7 @@ int game_loop (void) {
 		} while (thispuffle != NULL);
 		
 		if (first_puffle == NULL) {
-			done = 1;
+			done = GAME_CONTINUE;
 			/* TODO: Fin del juego, todos los puffles perdidos */
 			break;
 		}
@@ -798,7 +891,7 @@ void setup (void) {
 		exit (1);
 	}
 	
-	use_sound = 1;
+	use_sound = 0;
 	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
 		fprintf (stdout,
 			"\nAdvertencia: No se pudo inicializar el sistema de audio\n"
@@ -841,6 +934,12 @@ void setup (void) {
 		images[g] = image;
 		/* TODO: Mostrar la carga de porcentaje */
 	}
+	
+	/* Pre-Dibujar la pantalla gris */
+	grey_screen = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 760, 480, 32, 0, 0, 0, 0);
+	SDL_FillRect (grey_screen, NULL,
+	              SDL_MapRGB (grey_screen->format, 0, 0, 0)); /* Negro */
+	SDL_SetAlpha (grey_screen, SDL_SRCALPHA, 128); /* Alpha al 50 % */
 	
 	/* TODO: Inicializar la TTF */
 	

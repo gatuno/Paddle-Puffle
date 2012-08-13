@@ -34,9 +34,16 @@ PKG_CHECK_MODULES(SDL_image, [SDL_image >= $SDL_IMAGE_VERSION], [], [])
 # SDL_Mixer doesn't have pkg-config
 SDL_mixer_LIBS=""
 AC_ARG_VAR(SDL_mixer_LIBS, [linker flags for SDL_mixer])
-AC_MSG_CHECKING([if you have SDL_mixer installed on your system])
+# AC_MSG_CHECKING([if you have SDL_mixer installed on your system])
 AC_CHECK_HEADERS(SDL/SDL_mixer.h, [], [AC_MSG_FAILURE([SDL_mixer not found in your system])])
 AC_CHECK_LIB(SDL_mixer, main, [SDL_mixer_LIBS="-lSDL_mixer"], [AC_MSG_FAILURE([SDL_mixer not found in your system])])
+
+# Also, SDL_ttf doesn't have pkg-config
+SDL_ttf_LIBS=""
+AC_ARG_VAR(SDL_ttf_LIBS, [linker flags for SDL_ttf])
+# AC_MSG_CHECKING([if you have SDL_ttf installed on your system])
+AC_CHECK_HEADERS(SDL/SDL_ttf.h, [], [AC_MSG_FAILURE([SDL_ttf not found in your system])])
+AC_CHECK_LIB(SDL_ttf, main, [SDL_ttf_LIBS="-lSDL_ttf"], [AC_MSG_FAILURE([SDL_ttf not found in your system])])
 
 AC_CONFIG_HEADERS([config.h])
 

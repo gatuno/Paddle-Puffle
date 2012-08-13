@@ -38,6 +38,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_ttf.h>
+
+#include "draw-text.h"
 
 #define FPS (1000/24)
 
@@ -416,6 +419,44 @@ enum {
 	GAME_QUIT
 };
 
+enum {
+	TEXT_HELP,
+	TEXT_WARINING,
+	TEXT_TICKETS,
+	TEXT_SCORE_BOUNCE_POINTS,
+	TEXT_SCORE_MOST_BOUNCED,
+	TEXT_SCORE_PUFFLES_JUGGLED,
+	TEXT_SCORE_TOTAL_TICKETS,
+	TEXT_UI_PLAY,
+	TEXT_UI_DONE,
+	NUM_TEXTS
+};
+
+/* Estas cadenas son traducibles */
+const char * text_strings[NUM_TEXTS] = {
+	"- USE YOUR MOUSE TO BOUNCE THE \n  PUFFLES AND KEEP THEM IN THE AIR \n\n- EVERY TIME YOU BOUNCE A PUFFLE \n  YOU INCREASE YOUR SCORE \n\n- JUGGLE MORE AT ONCE TO WIN MORE \n\n- THE LONGER YOU CAN KEEP BOUNCING \n  THE SAME PUFFLE THE MORE YOU WIN",
+	"WARNING! \n\nFIXME: CHANGE THIS \nTEXT.",
+	"TICKETS",
+	"BOUNCE POINTS:",
+	"MOST BOUNCED PUFFLE:",
+	"PUFFLES JUGGLED:",
+	"TOTAL TICKETS:",
+	"PLAY",
+	"DONE"
+};
+
+static int text_info [NUM_TEXTS] = { /* Tamaño, por el momento */
+	14,
+	10,
+	16,
+	14,
+	14,
+	14,
+	26,
+	20,
+	20
+};
+
 /* La estructura principal de un puffle */
 typedef struct _Puffle{
 	struct _Puffle *next;
@@ -441,6 +482,7 @@ int map_button_in_game (int x, int y);
 /* Variables globales */
 SDL_Surface * screen;
 SDL_Surface * images[NUM_IMAGES];
+SDL_Surface * texts[NUM_TEXTS];
 Puffle *first_puffle = NULL;
 Puffle *last_puffle = NULL;
 int num_rects;
@@ -487,6 +529,13 @@ int game_intro (void) {
 	dest_rect.w = images [IMG_TITLE_OPENING]->w;
 	
 	SDL_BlitSurface (images [IMG_TITLE_OPENING], NULL, screen, &dest_rect);
+	
+	dest_rect.x = 164;
+	dest_rect.y = 161;
+	dest_rect.h = texts [TEXT_HELP]->h;
+	dest_rect.w = texts [TEXT_HELP]->w;
+	
+	SDL_BlitSurface (texts [TEXT_HELP], NULL, screen, &dest_rect);
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	
@@ -869,14 +918,16 @@ SDL_Surface * set_video_mode (unsigned flags) {
 
 void setup (void) {
 	SDL_Surface * image;
+	TTF_Font *ttf10, *ttf14, *ttf16, *ttf20, *ttf26, *temp_font;
+	SDL_Color color;
 	int g;
 	
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf (stderr,
-			"\nError: No se pudo inicializar el sistema de video\n"
+			"Error: No se pudo inicializar el sistema de video\n"
 			"El error devuelto por SDL es:\n"
-			"%s\n\n", SDL_GetError());
+			"%s\n", SDL_GetError());
 		exit (1);
 	}
 	
@@ -885,17 +936,17 @@ void setup (void) {
 	
 	if (screen == NULL) {
 		fprintf (stderr,
-			"\nError: I could not set up video for 760x480 mode.\n"
+			"Error: I could not set up video for 760x480 mode.\n"
 			"The Simple DirectMedia error that occured was:\n"
-			"%s\n\n", SDL_GetError());
+			"%s\n", SDL_GetError());
 		exit (1);
 	}
 	
 	use_sound = 0;
 	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
 		fprintf (stdout,
-			"\nAdvertencia: No se pudo inicializar el sistema de audio\n"
-			"Continuando...\n\n");
+			"Advertencia: No se pudo inicializar el sistema de audio\n"
+			"Continuando...\n");
 		use_sound = 0;
 	}
 	
@@ -903,7 +954,7 @@ void setup (void) {
 		/* Inicializar el sonido */
 		if (Mix_OpenAudio (22050, AUDIO_S16, 2, 4096) < 0) {
 			fprintf (stdout,
-				"\nAdvertencia: <Poner un mensaje de error descriptivo>\n");
+				"Advertencia: <Poner un mensaje de error descriptivo>\n");
 			use_sound = 0;
 		}
 	}
@@ -913,10 +964,11 @@ void setup (void) {
 		
 		if (image == NULL) {
 			fprintf (stderr,
-				"\nError al cargar el archivo:\n"
+				"Error al cargar el archivo:\n"
 				"%s\n"
 				"El error devuelto por SDL es:\n"
-				"%s\n\n", images_names[g], SDL_GetError());
+				"%s\n", images_names[g], SDL_GetError());
+			SDL_Quit ();
 			exit (1);
 		}
 		
@@ -941,18 +993,17 @@ void setup (void) {
 	              SDL_MapRGB (grey_screen->format, 0, 0, 0)); /* Negro */
 	SDL_SetAlpha (grey_screen, SDL_SRCALPHA, 128); /* Alpha al 50 % */
 	
-	/* TODO: Inicializar la TTF */
-	
 	if (use_sound) {
 		for (g = 0; g < NUM_SOUNDS; g++) {
 			sounds[g] = Mix_LoadWAV (sound_names [g]);
 			
 			if (sounds[g] == NULL) {
 				fprintf (stderr,
-					"\nError: No se pudo cargar un archivo de sonido:\n"
+					"Error: No se pudo cargar un archivo de sonido:\n"
 					"%s\n"
 					"El error devuelto por SDL es:\n"
-					"%s\n\n", sound_names [g], SDL_GetError ());
+					"%s\n", sound_names [g], SDL_GetError ());
+				SDL_Quit ();
 				exit (1);
 			}
 		}
@@ -963,14 +1014,62 @@ void setup (void) {
 		
 		if (mus_carnie == NULL) {
 			fprintf (stderr,
-				"\nError: No se pudo cargar un archivo de sonido:\n"
+				"Error: No se pudo cargar un archivo de sonido:\n"
 				"%s\n"
 				"El error devuelto por SDL es:\n"
-				"%s\n\n", MUS_CARNIE, SDL_GetError ());
+				"%s\n", MUS_CARNIE, SDL_GetError ());
+			SDL_Quit ();
 			exit (1);
 		}
 		
 	}
+	
+	if (TTF_Init () < 0) {
+		fprintf (stderr,
+			"Error: No se pudo inicializar la librería SDL_ttf\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	/* Tipografias 10, 14, 16, 20, 26 */
+	ttf10 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 10);
+	ttf14 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 14);
+	ttf16 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
+	ttf20 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
+	ttf26 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 26);
+	
+	if (!ttf10 || !ttf14 || !ttf16 || !ttf20 || !ttf26) {
+		fprintf (stderr,
+			"Error: No se pudo cargar la tipografía 'CCFaceFront'\n"
+			"El error devuelto por SDL es:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	color.r = color.g = color.b = 0; /* Negro */
+	
+	for (g = 0; g < NUM_TEXTS; g++) {
+		switch (text_info [g]) {
+			case 10: temp_font = ttf10; break;
+			case 14: temp_font = ttf14; break;
+			case 16: temp_font = ttf16; break;
+			case 20: temp_font = ttf20; break;
+			case 26: temp_font = ttf26; break;
+			default: temp_font = ttf16;
+		}
+		
+		texts[g] = draw_text (temp_font, text_strings[g], &color);
+	}
+	
+	TTF_CloseFont (ttf10);
+	TTF_CloseFont (ttf14);
+	TTF_CloseFont (ttf16);
+	TTF_CloseFont (ttf20);
+	TTF_CloseFont (ttf26);
+	
+	TTF_Quit ();
 	
 	/* Generador de números aleatorios */
 	srand (SDL_GetTicks ());

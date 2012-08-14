@@ -60,6 +60,10 @@ enum {
 	IMG_CLOSE_BUTTON_OVER,
 	IMG_CLOSE_BUTTON_DOWN,
 	
+	IMG_BUTTON_UI_UP,
+	IMG_BUTTON_UI_OVER,
+	IMG_BUTTON_UI_DOWN,
+	
 	IMG_PADDLE_1,
 	IMG_PADDLE_2,
 	IMG_PADDLE_3,
@@ -171,9 +175,13 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/fail-0.png",
 	GAMEDATA_DIR "images/fail-1.png",
 	
-	GAMEDATA_DIR "images/botonup.png",
-	GAMEDATA_DIR "images/botonover.png",
-	GAMEDATA_DIR "images/botondown.png",
+	GAMEDATA_DIR "images/boton-close-up.png",
+	GAMEDATA_DIR "images/boton-close-over.png",
+	GAMEDATA_DIR "images/boton-close-down.png",
+	
+	GAMEDATA_DIR "images/boton-ui-up.png",
+	GAMEDATA_DIR "images/boton-ui-over.png",
+	GAMEDATA_DIR "images/boton-ui-down.png",
 	
 	GAMEDATA_DIR "images/paddle-1.png",
 	GAMEDATA_DIR "images/paddle-2.png",
@@ -409,7 +417,8 @@ static int paddle_outputs [5] = {
 /* Para verificar los botones */
 enum {
 	BUTTON_NONE = 0,
-	BUTTON_CLOSE
+	BUTTON_CLOSE,
+	BUTTON_UI_PLAY
 };
 
 /* Codigos de salida */
@@ -478,6 +487,7 @@ SDL_Surface * set_video_mode(unsigned flags);
 void nuevo_puffle (void);
 void eliminar_puffle (Puffle *p);
 int map_button_in_game (int x, int y);
+int map_button_in_opening (int x, int y);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -577,7 +587,7 @@ int game_intro (void) {
 		/* Dibujar el botón de cierre */
 		/* Posición original X:734, Y:22
 		 * Centro +- 14.05 */
-		dest_rect.x = 720; dest_rect.y = 8; dest_rect.h = images[button_frame]->h; dest_rect.w = images[button_frame]->w;
+		dest_rect.x = 720; dest_rect.y = 8;
 		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE)) {
 			/* Está presionado el botón del mouse, y está sobre el botón */
 			button_frame = IMG_CLOSE_BUTTON_DOWN;
@@ -589,7 +599,10 @@ int game_intro (void) {
 		} else {
 			button_frame = IMG_CLOSE_BUTTON_UP;
 		}
-		SDL_BlitSurface (images[button_frame], NULL, screen, &dest_rect);
+		dest_rect.h = images [button_frame]->h; dest_rect.w = images [button_frame]->w;
+		SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], &dest_rect, screen, &dest_rect);
+		SDL_BlitSurface (grey_screen, &dest_rect, screen, &dest_rect);
+		SDL_BlitSurface (images [button_frame], NULL, screen, &dest_rect);
 		
 		SDL_Flip (screen);
 		
@@ -1128,5 +1141,12 @@ void eliminar_puffle (Puffle *p) {
 inline int map_button_in_game (int x, int y) {
 	/* Checar por el botón de cierre */
 	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
+	return BUTTON_NONE;
+}
+
+inline int map_button_in_opening (int x, int y) {
+	/* Checar por el botón de cierre */
+	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
+	if (x >= 300 && x < 462 && y >= 361 && y < 407) return BUTTON_UI_PLAY;
 	return BUTTON_NONE;
 }

@@ -5,9 +5,12 @@ nobase_dist_gamedata_DATA = images/fail-0.png \
 	images/new-0.png \
 	images/new-1.png \
 	images/normal.png \
-	images/botonover.png \
-	images/botonup.png \
-	images/botondown.png \
+	images/boton-close-over.png \
+	images/boton-close-up.png \
+	images/boton-close-down.png \
+	images/boton-ui-up.png \
+	images/boton-ui-over.png \
+	images/boton-ui-down.png \
 	images/paddle-1.png \
 	images/paddle-2.png \
 	images/paddle-3.png \

@@ -563,17 +563,19 @@ int game_intro (void) {
 					/* Tengo un Mouse Down */
 					if (event.button.button == SDL_BUTTON_RIGHT) done = GAME_CONTINUE;
 					if (event.button.button != SDL_BUTTON_LEFT) break;
-					if (last_button == BUTTON_NONE) last_button = map_button_in_game (event.button.x, event.button.y);
+					if (last_button == BUTTON_NONE) last_button = map_button_in_opening (event.button.x, event.button.y);
 					break;
 				case SDL_MOUSEBUTTONUP:
 					/* Tengo un mouse Up */
 					if (event.button.button != SDL_BUTTON_LEFT) break;
 					if (last_button != BUTTON_NONE) {
-						if (map_button_in_game (event.button.x, event.button.y) == last_button) {
+						if (map_button_in_opening (event.button.x, event.button.y) == last_button) {
 							/* Mouse down y mouse up sobre el mismo botón */
 							/* Utilizar switch para muchos botones */
 							if (last_button == BUTTON_CLOSE) {
 								done = GAME_QUIT;
+							} else {
+								done = GAME_CONTINUE;
 							}
 							button_pressed = last_button;
 						}
@@ -588,13 +590,13 @@ int game_intro (void) {
 		/* Posición original X:734, Y:22
 		 * Centro +- 14.05 */
 		dest_rect.x = 720; dest_rect.y = 8;
-		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE)) {
+		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_opening (handposx, handposy) == BUTTON_CLOSE)) {
 			/* Está presionado el botón del mouse, y está sobre el botón */
 			button_frame = IMG_CLOSE_BUTTON_DOWN;
 			button_pressed = BUTTON_NONE;
 		} else if (last_button == BUTTON_CLOSE) {
 			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else if (last_button == BUTTON_NONE && map_button_in_game (handposx, handposy) == BUTTON_CLOSE) {
+		} else if (last_button == BUTTON_NONE && map_button_in_opening (handposx, handposy) == BUTTON_CLOSE) {
 			button_frame = IMG_CLOSE_BUTTON_OVER;
 		} else {
 			button_frame = IMG_CLOSE_BUTTON_UP;
@@ -602,6 +604,25 @@ int game_intro (void) {
 		dest_rect.h = images [button_frame]->h; dest_rect.w = images [button_frame]->w;
 		SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], &dest_rect, screen, &dest_rect);
 		SDL_BlitSurface (grey_screen, &dest_rect, screen, &dest_rect);
+		SDL_BlitSurface (images [button_frame], NULL, screen, &dest_rect);
+		
+		/* Dibujar el botón de "PLAY" */
+		/* Posición original: X:299.45, Y:360.8 */
+		dest_rect.x = 299; dest_rect.y = 359;
+		if (button_pressed == BUTTON_UI_PLAY || (last_button == BUTTON_UI_PLAY && map_button_in_opening (handposx, handposy) == BUTTON_UI_PLAY)) {
+			button_frame = IMG_BUTTON_UI_DOWN;
+			button_pressed = BUTTON_NONE;
+		} else if (last_button == BUTTON_UI_PLAY) {
+			button_frame = IMG_BUTTON_UI_OVER;
+		} else if (last_button == BUTTON_NONE && map_button_in_opening (handposx, handposy) == BUTTON_UI_PLAY) {
+			button_frame = IMG_BUTTON_UI_OVER;
+		} else {
+			button_frame = IMG_BUTTON_UI_UP;
+		}
+		dest_rect.h = images [button_frame]->h; dest_rect.w = images [button_frame]->w;
+		SDL_FillRect (screen, &dest_rect,
+		              SDL_MapRGB (screen->format, 0xf0, 0xc4, 0x3f));
+		
 		SDL_BlitSurface (images [button_frame], NULL, screen, &dest_rect);
 		
 		SDL_Flip (screen);
@@ -1147,6 +1168,6 @@ inline int map_button_in_game (int x, int y) {
 inline int map_button_in_opening (int x, int y) {
 	/* Checar por el botón de cierre */
 	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
-	if (x >= 300 && x < 462 && y >= 361 && y < 407) return BUTTON_UI_PLAY;
+	if (x >= 299 && x < 462 && y >= 360 && y < 407) return BUTTON_UI_PLAY;
 	return BUTTON_NONE;
 }

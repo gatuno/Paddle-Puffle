@@ -495,7 +495,6 @@ SDL_Surface * images[NUM_IMAGES];
 SDL_Surface * texts[NUM_TEXTS];
 Puffle *first_puffle = NULL;
 Puffle *last_puffle = NULL;
-int num_rects;
 int background_frame = 0;
 int use_sound;
 SDL_Surface *grey_screen;
@@ -622,8 +621,10 @@ int game_intro (void) {
 		dest_rect.h = images [button_frame]->h; dest_rect.w = images [button_frame]->w;
 		SDL_FillRect (screen, &dest_rect,
 		              SDL_MapRGB (screen->format, 0xf0, 0xc4, 0x3f));
-		
 		SDL_BlitSurface (images [button_frame], NULL, screen, &dest_rect);
+		dest_rect.x = 381 - (texts[TEXT_UI_PLAY]->w / 2); dest_rect.y = 373;
+		dest_rect.h = texts [TEXT_UI_PLAY]->h; dest_rect.w = texts[TEXT_UI_PLAY]->w;
+		SDL_BlitSurface (texts[TEXT_UI_PLAY], NULL, screen, &dest_rect);
 		
 		SDL_Flip (screen);
 		
@@ -651,11 +652,13 @@ int game_loop (void) {
 	int wind = 1, wind_countdown = 240; /* Para evitar puffles estancados verticalmente */
 	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0; /* Llevar la cantidad de puffles */
 	int count = 0, goal = 20, default_goal = 20; /* Para control de la generación de próximos puffles */
-	int bounces = 0; /* Bounces, golpes totales */
+	int bounces = 0, role; /* Bounces, golpes totales. Role, el mayor número de golpes */
 	int paddle_x, paddle_y, paddle_frame = 0;
+	int tickets;
 	Puffle *thispuffle;
 	
 	nuevo_puffle ();
+	background_frame = 0;
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_GetMouseState (&handposx, &handposy);
 	
@@ -792,6 +795,8 @@ int game_loop (void) {
 		
 		if (first_puffle == NULL) {
 			done = GAME_CONTINUE;
+			
+			tickets = bounces + most_puffles * role;
 			/* TODO: Fin del juego, todos los puffles perdidos */
 			break;
 		}
@@ -844,10 +849,15 @@ int game_loop (void) {
 					
 					/* TODO: Role and poptxt */
 					thispuffle->pop_num++;
+					
+					if (thispuffle->pop_num > role) role = thispuffle->pop_num;
+					
 					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
 					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
 					
 					if (use_sound) Mix_PlayChannel (-1, sounds[sonido], 0);
+					
+					tickets = bounces + most_puffles * role;
 				}
 				
 				if ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) && ((thispuffle->x > handposx && thispuffle->x < handposx2) || (thispuffle->x < handposx && thispuffle->x > handposx2))) {
@@ -868,10 +878,15 @@ int game_loop (void) {
 					
 					/* TODO: Role and poptxt */
 					thispuffle->pop_num++;
+					
+					if (thispuffle->pop_num > role) role = thispuffle->pop_num;
+					
 					thispuffle->frame = puffle_frames [thispuffle->frame][PUFFLE_BOUNCE];
 					paddle_frame = paddle_frames [paddle_frame][PADDLE_BOUNCE];
 					
 					if (use_sound) Mix_PlayChannel (-1, sounds[sonido], 0);
+					
+					tickets = bounces + most_puffles * role;
 				}
 			}
 			
@@ -976,7 +991,7 @@ void setup (void) {
 		exit (1);
 	}
 	
-	use_sound = 0;
+	use_sound = 1;
 	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
 		fprintf (stdout,
 			"Advertencia: No se pudo inicializar el sistema de audio\n"
@@ -1040,6 +1055,7 @@ void setup (void) {
 				SDL_Quit ();
 				exit (1);
 			}
+			Mix_VolumeChunk (sounds[g], MIX_MAX_VOLUME / 2);
 		}
 		
 		/* Cargar la música */
@@ -1072,6 +1088,12 @@ void setup (void) {
 	ttf16 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
 	ttf20 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
 	ttf26 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 26);
+	
+	TTF_SetFontStyle (ttf10, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf14, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf16, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf20, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf26, TTF_STYLE_ITALIC);
 	
 	if (!ttf10 || !ttf14 || !ttf16 || !ttf20 || !ttf26) {
 		fprintf (stderr,

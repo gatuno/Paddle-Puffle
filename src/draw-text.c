@@ -28,6 +28,11 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "draw-text.h"
+
+SDL_Color blanco = {255, 255, 255, 0};
+SDL_Color negro = {0, 0, 0, 0};
+
 SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 	SDL_Surface *final, **text;
 	SDL_Rect dest_rect;
@@ -59,11 +64,8 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 			g++;
 			str_token = strsep (&dup, "\n");
 		};
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		final = SDL_CreateRGBSurface (SDL_SWSURFACE, maxw, len, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-#else
-		final = SDL_CreateRGBSurface (SDL_SWSURFACE, maxw, len, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-#endif
+		final = SDL_CreateRGBSurface (SDL_SWSURFACE, maxw, len, 32, RMASK, GMASK, BMASK, AMASK);
+		
 		SDL_FillRect (final, NULL, SDL_MapRGBA (final->format, 0, 0, 0, 0));
 		/*SDL_SetAlpha(final, 0, SDL_ALPHA_OPAQUE);*/
 		len = TTF_FontLineSkip (font);
@@ -85,5 +87,33 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 		/* En caso contrario, renderizarla nosotros mismos */
 		return TTF_RenderUTF8_Blended (font, cadena, *color);
 	}
+}
+
+SDL_Surface *draw_text_with_shadow (TTF_Font *font_normal, TTF_Font *font_outline, char *text) {
+	SDL_Surface *black_letters, *white_letters;
+	SDL_Rect rect;
+	
+	/* Algunas validaciones */
+	if (!font_normal || !font_outline) {
+		return NULL;
+	}
+	
+	if (!text || text[0] == '\0') {
+		/* Texto vacio */
+		return NULL;
+	}
+	
+	black_letters = TTF_RenderUTF8_Blended (font_outline, text, negro);
+	
+	white_letters = TTF_RenderUTF8_Blended (font_normal, text, blanco);
+	
+	rect.w = white_letters->w; rect.h = white_letters->h;
+	rect.x = rect.y = OUTLINE_TEXT;
+	
+	SDL_BlitSurface (white_letters, NULL, black_letters, &rect);
+	
+	SDL_FreeSurface (white_letters);
+	
+	return black_letters;
 }
 

@@ -467,7 +467,7 @@ static int text_info [NUM_TEXTS] = { /* Tamaño, por el momento */
 };
 
 /* La estructura principal de un puffle */
-typedef struct _Puffle{
+typedef struct _Puffle {
 	struct _Puffle *next;
 	struct _Puffle *prev;
 	int x;
@@ -501,6 +501,9 @@ SDL_Surface *grey_screen;
 
 Mix_Chunk * sounds[NUM_SOUNDS];
 Mix_Music * mus_carnie;
+
+TTF_Font *ttf20_outline, *ttf20_normal;
+TTF_Font *ttf16_outline, *ttf16_normal;
 
 int main (int argc, char *argv[]) {
 	setup ();
@@ -650,12 +653,14 @@ int game_loop (void) {
 	float poder;
 	float speed = 10, balance = 4;
 	int wind = 1, wind_countdown = 240; /* Para evitar puffles estancados verticalmente */
-	int n_puffles = 1, most_puffles = 0, dropped_puffles = 0; /* Llevar la cantidad de puffles */
+	int n_puffles = 1, most_puffles = 1, dropped_puffles = 0; /* Llevar la cantidad de puffles */
 	int count = 0, goal = 20, default_goal = 20; /* Para control de la generación de próximos puffles */
-	int bounces = 0, role; /* Bounces, golpes totales. Role, el mayor número de golpes */
+	int bounces = 0, role = 0; /* Bounces, golpes totales. Role, el mayor número de golpes */
 	int paddle_x, paddle_y, paddle_frame = 0;
-	int tickets;
+	int tickets = 0;
 	Puffle *thispuffle;
+	SDL_Surface *text_num;
+	char text_buffer[6];
 	
 	nuevo_puffle ();
 	background_frame = 0;
@@ -858,9 +863,7 @@ int game_loop (void) {
 					if (use_sound) Mix_PlayChannel (-1, sounds[sonido], 0);
 					
 					tickets = bounces + most_puffles * role;
-				}
-				
-				if ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) && ((thispuffle->x > handposx && thispuffle->x < handposx2) || (thispuffle->x < handposx && thispuffle->x > handposx2))) {
+				} else if ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) && ((thispuffle->x > handposx && thispuffle->x < handposx2) || (thispuffle->x < handposx && thispuffle->x > handposx2))) {
 					/* Bounce the puffle */
 					sonido = SND_SQUEAK1 + (int) (2.0 * rand () / (RAND_MAX + 1.0));
 					
@@ -898,6 +901,16 @@ int game_loop (void) {
 			if (thispuffle != NULL) thispuffle = thispuffle->next;
 		} while (thispuffle != NULL);
 		
+		/* Dibujar la cantidad de tickets */
+		sprintf (text_buffer, "%d", tickets);
+		text_num = draw_text_with_shadow (ttf16_normal, ttf16_outline, text_buffer);
+		puf_pos.x = 607 + ((136 - text_num->w) / 2);
+		puf_pos.y = 60 + ((26 - text_num->h) / 2);
+		puf_pos.w = text_num->w; puf_pos.h = text_num->h;
+		
+		SDL_BlitSurface (text_num, NULL, screen, &puf_pos);
+		SDL_FreeSurface (text_num);
+		
 		paddle_x = handposx;
 		paddle_y = handposy;
 		
@@ -927,7 +940,7 @@ int game_loop (void) {
 			button_frame = IMG_CLOSE_BUTTON_UP;
 		}
 		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
-			
+		
 		thispuffle = first_puffle;
 		do {
 			if (thispuffle->y > -100) {
@@ -967,7 +980,7 @@ SDL_Surface * set_video_mode (unsigned flags) {
 
 void setup (void) {
 	SDL_Surface * image;
-	TTF_Font *ttf10, *ttf14, *ttf16, *ttf20, *ttf26, *temp_font;
+	TTF_Font *ttf10, *ttf14, *ttf16, *ttf26, *temp_font;
 	SDL_Color color;
 	int g;
 	
@@ -1104,6 +1117,11 @@ void setup (void) {
 		exit (1);
 	}
 	
+	TTF_SetFontStyle (ttf10, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf14, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf16, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf26, TTF_STYLE_ITALIC);
+	
 	color.r = color.g = color.b = 0; /* Negro */
 	
 	for (g = 0; g < NUM_TEXTS; g++) {
@@ -1125,7 +1143,34 @@ void setup (void) {
 	TTF_CloseFont (ttf20);
 	TTF_CloseFont (ttf26);
 	
-	TTF_Quit ();
+	/* Copiar la palabra "Tickets" en el background */
+	rect.x = 607 + ((135 - texts[TEXT_TICKETS]->w) / 2); rect.y = 38;
+	rect.w = texts[TEXT_TICKETS]->w; rect.h = texts[TEXT_TICKETS]->h;
+	for (g = IMG_BACKGROUND_NORMAL; g <= IMG_BACKGROUND_FAIL_1; g++) {
+		SDL_BlitSurface (texts[TEXT_TICKETS], NULL, images[g], &rect);
+	}
+	
+	/* Dejar abiertas las otras tipografias */
+	ttf16_normal = ttf16;
+	ttf20_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
+	ttf20_outline = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
+	ttf16_outline = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
+	
+	if (!ttf20_normal || !ttf20_outline || !ttf16_outline) {
+		fprintf (stderr,
+			"Error: No se pudo cargar la tipografía 'CCFaceFront'\n"
+			"El error devuelto por SDL es:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (ttf16_outline, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf20_outline, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf20_normal, TTF_STYLE_ITALIC);
+	
+	TTF_SetFontOutline (ttf16_outline, OUTLINE_TEXT);
+	TTF_SetFontOutline (ttf20_outline, OUTLINE_TEXT);
 	
 	/* Generador de números aleatorios */
 	srand (SDL_GetTicks ());

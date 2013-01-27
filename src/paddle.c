@@ -414,11 +414,15 @@ static int paddle_outputs [5] = {
 	IMG_PADDLE_4
 };
 
-/* Para verificar los botones */
+/* Para el motor de botones */
 enum {
-	BUTTON_NONE = 0,
+	BUTTON_NONE,
+	
 	BUTTON_CLOSE,
-	BUTTON_UI_PLAY
+	BUTTON_UI_PLAY,
+	BUTTON_UI_CLOSE,
+	
+	NUM_BUTTONS
 };
 
 /* Codigos de salida */
@@ -436,8 +440,6 @@ enum {
 	TEXT_SCORE_MOST_BOUNCED,
 	TEXT_SCORE_PUFFLES_JUGGLED,
 	TEXT_SCORE_TOTAL_TICKETS,
-	TEXT_UI_PLAY,
-	TEXT_UI_DONE,
 	NUM_TEXTS
 };
 
@@ -449,9 +451,7 @@ const char * text_strings[NUM_TEXTS] = {
 	"BOUNCE POINTS:",
 	"MOST BOUNCED PUFFLE:",
 	"PUFFLES JUGGLED:",
-	"TOTAL TICKETS:",
-	"PLAY",
-	"DONE"
+	"TOTAL TICKETS:"
 };
 
 static int text_info [NUM_TEXTS] = { /* Tamaño, por el momento */
@@ -461,9 +461,22 @@ static int text_info [NUM_TEXTS] = { /* Tamaño, por el momento */
 	14,
 	14,
 	14,
-	26,
-	20,
-	20
+	26
+};
+
+int button_frame [NUM_BUTTONS] = {
+	0,
+	
+	IMG_CLOSE_BUTTON_UP,
+	IMG_BUTTON_UI_UP,
+	IMG_BUTTON_UI_UP
+};
+
+int button_refresh [NUM_BUTTONS] = {
+	0,
+	0,
+	0,
+	0
 };
 
 /* La estructura principal de un puffle */
@@ -518,23 +531,31 @@ int main (int argc, char *argv[]) {
 }
 
 int game_intro (void) {
-	int done;
+	int done = 0;
 	SDL_Event event;
 	SDLKey key;
 	SDL_Rect dest_rect;
 	Uint32 last_time, now_time;
-	int last_button = 0, button_frame, button_pressed;
+	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
 	int handposx, handposy;
+	SDL_Surface *play_text_button;
+	
+	play_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, "PLAY");
 	
 	/* Iniciar la música */
 	if (use_sound) {
 		Mix_PlayMusic (mus_carnie, -1);
 	}
 	
+	/* Preparar el escenario */
+	
+	/* Primero el background */
 	SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], NULL, screen, NULL);
 	
+	/* Luego la pantalla negra */
 	SDL_BlitSurface (grey_screen, NULL, screen, NULL);
 	
+	/* La pantalla del opening */
 	dest_rect.x = 107;
 	dest_rect.y = 17;
 	dest_rect.h = images [IMG_TITLE_OPENING]->h;
@@ -542,6 +563,7 @@ int game_intro (void) {
 	
 	SDL_BlitSurface (images [IMG_TITLE_OPENING], NULL, screen, &dest_rect);
 	
+	/* El texto de ayuda */
 	dest_rect.x = 164;
 	dest_rect.y = 161;
 	dest_rect.h = texts [TEXT_HELP]->h;
@@ -549,7 +571,18 @@ int game_intro (void) {
 	
 	SDL_BlitSurface (texts [TEXT_HELP], NULL, screen, &dest_rect);
 	
-	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
+	/* El boton de cerrar */
+	dest_rect.x = 720; dest_rect.y = 8;
+	dest_rect.h = images [IMG_CLOSE_BUTTON_UP]->h; dest_rect.w = images [IMG_CLOSE_BUTTON_UP]->w;
+	SDL_BlitSurface (images [button_frame [BUTTON_CLOSE]], NULL, screen, &dest_rect);
+	
+	/* El boton de play */
+	dest_rect.x = 299; dest_rect.y = 359;
+	dest_rect.h = images [IMG_BUTTON_UI_UP]->h; dest_rect.w = images [IMG_BUTTON_UI_UP]->w;
+	SDL_BlitSurface (images [IMG_BUTTON_UI_UP], NULL, screen, &dest_rect);
+	dest_rect.x = 381 - (play_text_button->w / 2); dest_rect.y = 373;
+	dest_rect.h = play_text_button->h; dest_rect.w = play_text_button->w;
+	SDL_BlitSurface (play_text_button, NULL, screen, &dest_rect);
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -561,26 +594,74 @@ int game_intro (void) {
 					/* Vamos a cerrar la aplicación */
 					done = GAME_QUIT;
 					break;
+				case SDL_MOUSEMOTION:
+					map = map_button_in_opening (event.motion.x, event.motion.y);
+					
+					/* Motor de botones */
+					if (old_map == BUTTON_NONE && map != BUTTON_NONE) {
+						if (last_button == BUTTON_NONE) {
+							button_frame [map]++;
+						} else if (last_button == map) {
+							button_frame [map]++;
+						}
+						button_refresh [map] = 1;
+					} else if (old_map != BUTTON_NONE && map == BUTTON_NONE) {
+						if (last_button == BUTTON_NONE) {
+							button_frame [old_map]--;
+							button_refresh [old_map] = 1;
+						} else if (last_button == old_map) {
+							button_frame [last_button]--;
+							button_refresh [last_button] = 1;
+						}
+					} else if (old_map != map) {
+						if (last_button == BUTTON_NONE) {
+							button_frame [map]++;
+							button_refresh [map] = 1;
+							if (old_map != BUTTON_NONE) {
+								button_frame [old_map]--;
+								button_refresh [old_map] = 1;
+							}
+						} else if (last_button == old_map) {
+							button_frame [old_map]--;
+							button_refresh [old_map] = 1;
+						} else if (last_button == map) {
+							button_frame [map]++;
+							button_refresh [map] = 1;
+						}
+					}
+					old_map = map;
+					break;
 				case SDL_MOUSEBUTTONDOWN:
 					/* Tengo un Mouse Down */
-					if (event.button.button == SDL_BUTTON_RIGHT) done = GAME_CONTINUE;
 					if (event.button.button != SDL_BUTTON_LEFT) break;
-					if (last_button == BUTTON_NONE) last_button = map_button_in_opening (event.button.x, event.button.y);
+					last_button = map_button_in_opening (event.button.x, event.button.y);
+					
+					if (last_button != BUTTON_NONE) {
+						button_frame [last_button]++;
+						button_refresh [last_button] = 1;
+					}
 					break;
 				case SDL_MOUSEBUTTONUP:
 					/* Tengo un mouse Up */
 					if (event.button.button != SDL_BUTTON_LEFT) break;
 					if (last_button != BUTTON_NONE) {
-						if (map_button_in_opening (event.button.x, event.button.y) == last_button) {
-							/* Mouse down y mouse up sobre el mismo botón */
-							/* Utilizar switch para muchos botones */
+						map = map_button_in_opening (event.motion.x, event.motion.y);
+						
+						button_frame [last_button]--;
+						button_refresh [last_button] = 1;
+						if (map == last_button) {
+							/* Switch del boton */
+							
 							if (last_button == BUTTON_CLOSE) {
 								done = GAME_QUIT;
-							} else {
+							} else if (last_button == BUTTON_UI_PLAY) {
 								done = GAME_CONTINUE;
 							}
-							button_pressed = last_button;
+						} else if (map != BUTTON_NONE) {
+							button_frame [map]++;
+							button_refresh [map] = 1;
 						}
+						
 						last_button = BUTTON_NONE;
 					}
 					break;
@@ -591,43 +672,28 @@ int game_intro (void) {
 		/* Dibujar el botón de cierre */
 		/* Posición original X:734, Y:22
 		 * Centro +- 14.05 */
-		dest_rect.x = 720; dest_rect.y = 8;
-		if (button_pressed == BUTTON_CLOSE || (last_button == BUTTON_CLOSE && map_button_in_opening (handposx, handposy) == BUTTON_CLOSE)) {
-			/* Está presionado el botón del mouse, y está sobre el botón */
-			button_frame = IMG_CLOSE_BUTTON_DOWN;
-			button_pressed = BUTTON_NONE;
-		} else if (last_button == BUTTON_CLOSE) {
-			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else if (last_button == BUTTON_NONE && map_button_in_opening (handposx, handposy) == BUTTON_CLOSE) {
-			button_frame = IMG_CLOSE_BUTTON_OVER;
-		} else {
-			button_frame = IMG_CLOSE_BUTTON_UP;
+		if (button_refresh [BUTTON_CLOSE]) {
+			dest_rect.x = 720; dest_rect.y = 8;
+			dest_rect.h = images [IMG_CLOSE_BUTTON_UP]->h; dest_rect.w = images [IMG_CLOSE_BUTTON_UP]->w;
+			SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], &dest_rect, screen, &dest_rect);
+			SDL_BlitSurface (grey_screen, &dest_rect, screen, &dest_rect);
+			SDL_BlitSurface (images [button_frame [BUTTON_CLOSE]], NULL, screen, &dest_rect);
+			button_refresh [BUTTON_CLOSE] = 0;
 		}
-		dest_rect.h = images [button_frame]->h; dest_rect.w = images [button_frame]->w;
-		SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], &dest_rect, screen, &dest_rect);
-		SDL_BlitSurface (grey_screen, &dest_rect, screen, &dest_rect);
-		SDL_BlitSurface (images [button_frame], NULL, screen, &dest_rect);
 		
 		/* Dibujar el botón de "PLAY" */
 		/* Posición original: X:299.45, Y:360.8 */
-		dest_rect.x = 299; dest_rect.y = 359;
-		if (button_pressed == BUTTON_UI_PLAY || (last_button == BUTTON_UI_PLAY && map_button_in_opening (handposx, handposy) == BUTTON_UI_PLAY)) {
-			button_frame = IMG_BUTTON_UI_DOWN;
-			button_pressed = BUTTON_NONE;
-		} else if (last_button == BUTTON_UI_PLAY) {
-			button_frame = IMG_BUTTON_UI_OVER;
-		} else if (last_button == BUTTON_NONE && map_button_in_opening (handposx, handposy) == BUTTON_UI_PLAY) {
-			button_frame = IMG_BUTTON_UI_OVER;
-		} else {
-			button_frame = IMG_BUTTON_UI_UP;
+		if (button_refresh [BUTTON_UI_PLAY]) {
+			dest_rect.x = 299; dest_rect.y = 359;
+			dest_rect.h = images [IMG_BUTTON_UI_UP]->h; dest_rect.w = images [IMG_BUTTON_UI_UP]->w;
+			SDL_FillRect (screen, &dest_rect,
+				          SDL_MapRGB (screen->format, 0xf0, 0xc4, 0x3f));
+			SDL_BlitSurface (images [button_frame [BUTTON_UI_PLAY]], NULL, screen, &dest_rect);
+			dest_rect.x = 381 - (play_text_button->w / 2); dest_rect.y = 373;
+			dest_rect.h = play_text_button->h; dest_rect.w = play_text_button->w;
+			SDL_BlitSurface (play_text_button, NULL, screen, &dest_rect);
+			button_refresh [BUTTON_UI_PLAY] = 0;
 		}
-		dest_rect.h = images [button_frame]->h; dest_rect.w = images [button_frame]->w;
-		SDL_FillRect (screen, &dest_rect,
-		              SDL_MapRGB (screen->format, 0xf0, 0xc4, 0x3f));
-		SDL_BlitSurface (images [button_frame], NULL, screen, &dest_rect);
-		dest_rect.x = 381 - (texts[TEXT_UI_PLAY]->w / 2); dest_rect.y = 373;
-		dest_rect.h = texts [TEXT_UI_PLAY]->h; dest_rect.w = texts[TEXT_UI_PLAY]->w;
-		SDL_BlitSurface (texts[TEXT_UI_PLAY], NULL, screen, &dest_rect);
 		
 		SDL_Flip (screen);
 		
@@ -636,6 +702,7 @@ int game_intro (void) {
 		
 	} while (!done);
 	
+	SDL_FreeSurface (play_text_button);
 	return done;
 }
 
@@ -774,6 +841,7 @@ int game_loop (void) {
 		
 		thispuffle = first_puffle;
 		do {
+			/*printf ("Puffle %i pop num = %i\n", thispuffle->color, thispuffle->pop_num);*/
 			if (thispuffle->y > 530) {
 				/* Este puffle está perdido */
 				n_puffles--;
@@ -982,6 +1050,7 @@ void setup (void) {
 	SDL_Surface * image;
 	TTF_Font *ttf10, *ttf14, *ttf16, *ttf26, *temp_font;
 	SDL_Color color;
+	SDL_Rect rect;
 	int g;
 	
 	/* Inicializar el Video SDL */
@@ -1004,7 +1073,7 @@ void setup (void) {
 		exit (1);
 	}
 	
-	use_sound = 1;
+	use_sound = 0;
 	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
 		fprintf (stdout,
 			"Advertencia: No se pudo inicializar el sistema de audio\n"
@@ -1095,20 +1164,13 @@ void setup (void) {
 		exit (1);
 	}
 	
-	/* Tipografias 10, 14, 16, 20, 26 */
+	/* Tipografias 10, 14, 16, 26 */
 	ttf10 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 10);
 	ttf14 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 14);
 	ttf16 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
-	ttf20 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
 	ttf26 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 26);
 	
-	TTF_SetFontStyle (ttf10, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf14, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf16, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf20, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf26, TTF_STYLE_ITALIC);
-	
-	if (!ttf10 || !ttf14 || !ttf16 || !ttf20 || !ttf26) {
+	if (!ttf10 || !ttf14 || !ttf16 || !ttf26) {
 		fprintf (stderr,
 			"Error: No se pudo cargar la tipografía 'CCFaceFront'\n"
 			"El error devuelto por SDL es:\n"
@@ -1129,7 +1191,6 @@ void setup (void) {
 			case 10: temp_font = ttf10; break;
 			case 14: temp_font = ttf14; break;
 			case 16: temp_font = ttf16; break;
-			case 20: temp_font = ttf20; break;
 			case 26: temp_font = ttf26; break;
 			default: temp_font = ttf16;
 		}
@@ -1139,8 +1200,6 @@ void setup (void) {
 	
 	TTF_CloseFont (ttf10);
 	TTF_CloseFont (ttf14);
-	TTF_CloseFont (ttf16);
-	TTF_CloseFont (ttf20);
 	TTF_CloseFont (ttf26);
 	
 	/* Copiar la palabra "Tickets" en el background */

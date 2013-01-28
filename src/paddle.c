@@ -649,6 +649,14 @@ int game_intro (void) {
 					if (last_button != BUTTON_NONE) {
 						button_frame [last_button]++;
 						button_refresh [last_button] = 1;
+						
+						if (use_sound) {
+							if (last_button == BUTTON_UI_PLAY) {
+								Mix_PlayChannel (-1, sounds[SND_OVER_TO_DOWN2], 0);
+							} else if (last_button == BUTTON_CLOSE) {
+								Mix_PlayChannel (-1, sounds[SND_OVER_TO_DOWN1], 0);
+							}
+						}
 					}
 					break;
 				case SDL_MOUSEBUTTONUP:
@@ -891,6 +899,14 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 					if (last_button != BUTTON_NONE) {
 						button_frame [last_button]++;
 						button_refresh [last_button] = 1;
+						
+						if (use_sound) {
+							if (last_button == BUTTON_UI_DONE) {
+								Mix_PlayChannel (-1, sounds[SND_OVER_TO_DOWN2], 0);
+							} else if (last_button == BUTTON_CLOSE) {
+								Mix_PlayChannel (-1, sounds[SND_OVER_TO_DOWN1], 0);
+							}
+						}
 					}
 					break;
 				case SDL_MOUSEBUTTONUP:
@@ -994,7 +1010,6 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
 		
 		while (SDL_PollEvent(&event) > 0) {
-			/* fprintf (stdout, "Evento: %i\n", event.type);*/
 			switch (event.type) {
 				case SDL_QUIT:
 					/* Vamos a cerrar la aplicación */
@@ -1004,6 +1019,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					/* Tengo un Mouse Down */
 					if (event.button.button != SDL_BUTTON_LEFT) break;
 					if (last_button == BUTTON_NONE) last_button = map_button_in_game (event.button.x, event.button.y);
+					if (use_sound && last_button == BUTTON_CLOSE) Mix_PlayChannel (-1, sounds[SND_OVER_TO_DOWN1], 0);
 					break;
 				case SDL_MOUSEBUTTONUP:
 					/* Tengo un mouse Up */
@@ -1020,30 +1036,6 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 						last_button = BUTTON_NONE;
 					}
 					break;
-				case SDL_KEYDOWN:
-					/* Tengo una tecla presionada */
-					key = event.key.keysym.sym;
-					
-					if (key == SDLK_z) {
-						fprintf (stderr, "Sending new background\n");
-						background_frame = background_frames [background_frame][BACKGROUND_NEW];
-					} else if (key == SDLK_x) {
-						fprintf (stderr, "Sending fail background\n");
-						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
-					}
-					
-					if (key == SDLK_q) {
-						fprintf (stderr, "Bounces = 60, activando wind\n");
-						bounces = 60; /* Debug key */
-					} else if (key == SDLK_w) {
-						fprintf (stderr, "Bounces = 0, desactivando wind\n");
-						bounces = 0;
-					}
-					/* TODO: Toggle Fullscreen */
-					break;
-				/*case SDL_VIDEOEXPOSE:
-					refresh = 1;
-					break;*/
 			}
 		}
 		
@@ -1092,7 +1084,6 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		
 		thispuffle = first_puffle;
 		do {
-			/*printf ("Puffle %i pop num = %i\n", thispuffle->color, thispuffle->pop_num);*/
 			if (thispuffle->y > 530) {
 				/* Este puffle está perdido */
 				n_puffles--;
@@ -1327,7 +1318,7 @@ void setup (void) {
 		exit (1);
 	}
 	
-	use_sound = 0;
+	use_sound = 1;
 	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
 		fprintf (stdout,
 			"Advertencia: No se pudo inicializar el sistema de audio\n"
@@ -1357,17 +1348,6 @@ void setup (void) {
 			exit (1);
 		}
 		
-		/*images[g] = SDL_DisplayFormat (image);
-		
-		if (images[g] == NULL) {
-			fprintf (stderr,
-				"\nError: Fallo al convertir imagen\n"
-				"El error devuelto por SDL es:\n"
-				"%s\n\n", SDL_GetError ());
-			exit (EXIT_FAILURE);
-		}
-		
-		SDL_FreeSurface (image); */
 		images[g] = image;
 		/* TODO: Mostrar la carga de porcentaje */
 	}
@@ -1558,3 +1538,4 @@ inline int map_button_in_finish (int x, int y) {
 	if (x >= 250 && x < 413 && y >= 361 && y < 408) return BUTTON_UI_DONE;
 	return BUTTON_NONE;
 }
+

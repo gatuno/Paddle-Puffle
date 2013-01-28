@@ -420,7 +420,7 @@ enum {
 	
 	BUTTON_CLOSE,
 	BUTTON_UI_PLAY,
-	BUTTON_UI_CLOSE,
+	BUTTON_UI_DONE,
 	
 	NUM_BUTTONS
 };
@@ -494,13 +494,15 @@ typedef struct _Puffle {
 
 /* Prototipos de función */
 int game_intro (void);
-int game_loop (void);
+int game_loop (int *, int *, int *, int *);
+int game_finish (int, int, int, int);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
 void nuevo_puffle (void);
 void eliminar_puffle (Puffle *p);
 int map_button_in_game (int x, int y);
 int map_button_in_opening (int x, int y);
+int map_button_in_finish (int x, int y);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -517,13 +519,16 @@ Mix_Music * mus_carnie;
 
 TTF_Font *ttf20_outline, *ttf20_normal;
 TTF_Font *ttf16_outline, *ttf16_normal;
+TTF_Font *ttf14_normal, *ttf26_normal;
 
 int main (int argc, char *argv[]) {
+	int bounces, role, most, tickets;
+	
 	setup ();
 	do {
 		if (game_intro () == GAME_QUIT) break;
-		if (game_loop () == GAME_QUIT) break;
-		/* TODO: Pantalla de "gracias por jugar */
+		if (game_loop (&bounces, &role, &most, &tickets) == GAME_QUIT) break;
+		if (game_finish (bounces, role, most, tickets) == GAME_QUIT) break;
 	} while (1 == 0);
 	
 	SDL_Quit ();
@@ -537,7 +542,6 @@ int game_intro (void) {
 	SDL_Rect dest_rect;
 	Uint32 last_time, now_time;
 	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
-	int handposx, handposy;
 	SDL_Surface *play_text_button;
 	
 	play_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, "PLAY");
@@ -583,6 +587,8 @@ int game_intro (void) {
 	dest_rect.x = 381 - (play_text_button->w / 2); dest_rect.y = 373;
 	dest_rect.h = play_text_button->h; dest_rect.w = play_text_button->w;
 	SDL_BlitSurface (play_text_button, NULL, screen, &dest_rect);
+	
+	SDL_EventState (SDL_MOUSEMOTION, SDL_ENABLE);
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -668,7 +674,6 @@ int game_intro (void) {
 			}
 		}
 		
-		SDL_GetMouseState (&handposx, &handposy);
 		/* Dibujar el botón de cierre */
 		/* Posición original X:734, Y:22
 		 * Centro +- 14.05 */
@@ -706,7 +711,201 @@ int game_intro (void) {
 	return done;
 }
 
-int game_loop (void) {
+int game_finish (int bounces, int most_puffles, int role, int tickets) {
+	int done = 0;
+	SDL_Event event;
+	SDLKey key;
+	SDL_Rect dest_rect;
+	Uint32 last_time, now_time;
+	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	SDL_Surface *done_text_button;
+	char text_buffer [6];
+	
+	/* Texto traducible */
+	done_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, "DONE");
+	
+	/* Preparar el escenario */
+	
+	/* Primero el background */
+	SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], NULL, screen, NULL);
+	
+	/* Luego la pantalla negra */
+	SDL_BlitSurface (grey_screen, NULL, screen, NULL);
+	
+	/* La pantalla del opening */
+	dest_rect.x = 107;
+	dest_rect.y = 17;
+	dest_rect.h = images [IMG_TITLE_OPENING]->h;
+	dest_rect.w = images [IMG_TITLE_OPENING]->w;
+	
+	SDL_BlitSurface (images [IMG_TITLE_OPENING], NULL, screen, &dest_rect);
+	
+	/* Luego todos los textos */
+	/* El primero Bounce point, x = 122, y = 175 */
+	dest_rect.w = texts[TEXT_SCORE_BOUNCE_POINTS]->w;
+	dest_rect.x = 532 - dest_rect.w;
+	dest_rect.y = 175;
+	dest_rect.h = texts[TEXT_SCORE_BOUNCE_POINTS]->h;
+	SDL_BlitSurface (texts[TEXT_SCORE_BOUNCE_POINTS], NULL, screen, &dest_rect);
+	
+	/* El siguiente "Most bounced puffle", x = 121, y = 203.25 */
+	dest_rect.w = texts[TEXT_SCORE_MOST_BOUNCED]->w;
+	dest_rect.x = 531 - dest_rect.w;
+	dest_rect.y = 203;
+	dest_rect.h = texts[TEXT_SCORE_MOST_BOUNCED]->h;
+	SDL_BlitSurface (texts[TEXT_SCORE_MOST_BOUNCED], NULL, screen, &dest_rect);
+	
+	/* El siguiente es "Puffles Juggled", x = 122, y = 230.85 */
+	dest_rect.w = texts[TEXT_SCORE_PUFFLES_JUGGLED]->w;
+	dest_rect.x = 532 - dest_rect.w;
+	dest_rect.y = 231;
+	dest_rect.h = texts[TEXT_SCORE_PUFFLES_JUGGLED]->h;
+	SDL_BlitSurface (texts[TEXT_SCORE_PUFFLES_JUGGLED], NULL, screen, &dest_rect);
+	
+	/* Los tickets ganados:, X = 115.55, Y = 288.25 */
+	dest_rect.w = texts[TEXT_SCORE_TOTAL_TICKETS]->w;
+	dest_rect.x = 531 - dest_rect.w;
+	dest_rect.y = 288;
+	dest_rect.h = texts[TEXT_SCORE_TOTAL_TICKETS]->h;
+	SDL_BlitSurface (texts[TEXT_SCORE_TOTAL_TICKETS], NULL, screen, &dest_rect);
+	
+	/* El boton de cerrar */
+	dest_rect.x = 720; dest_rect.y = 8;
+	dest_rect.h = images [IMG_CLOSE_BUTTON_UP]->h; dest_rect.w = images [IMG_CLOSE_BUTTON_UP]->w;
+	SDL_BlitSurface (images [button_frame [BUTTON_CLOSE]], NULL, screen, &dest_rect);
+	
+	/* El boton de done */
+	dest_rect.x = 250; dest_rect.y = 361;
+	dest_rect.h = images [IMG_BUTTON_UI_UP]->h; dest_rect.w = images [IMG_BUTTON_UI_UP]->w;
+	SDL_BlitSurface (images [IMG_BUTTON_UI_UP], NULL, screen, &dest_rect);
+	dest_rect.x = 332 - (done_text_button->w / 2); dest_rect.y = 373;
+	dest_rect.h = done_text_button->h; dest_rect.w = done_text_button->w;
+	SDL_BlitSurface (done_text_button, NULL, screen, &dest_rect);
+	
+	SDL_EventState (SDL_MOUSEMOTION, SDL_ENABLE);
+	
+	do {
+		last_time = SDL_GetTicks ();
+		
+		while (SDL_PollEvent(&event) > 0) {
+			/* fprintf (stdout, "Evento: %i\n", event.type);*/
+			switch (event.type) {
+				case SDL_QUIT:
+					/* Vamos a cerrar la aplicación */
+					done = GAME_QUIT;
+					break;
+				case SDL_MOUSEMOTION:
+					map = map_button_in_finish (event.motion.x, event.motion.y);
+					
+					/* Motor de botones */
+					if (old_map == BUTTON_NONE && map != BUTTON_NONE) {
+						if (last_button == BUTTON_NONE) {
+							button_frame [map]++;
+						} else if (last_button == map) {
+							button_frame [map]++;
+						}
+						button_refresh [map] = 1;
+					} else if (old_map != BUTTON_NONE && map == BUTTON_NONE) {
+						if (last_button == BUTTON_NONE) {
+							button_frame [old_map]--;
+							button_refresh [old_map] = 1;
+						} else if (last_button == old_map) {
+							button_frame [last_button]--;
+							button_refresh [last_button] = 1;
+						}
+					} else if (old_map != map) {
+						if (last_button == BUTTON_NONE) {
+							button_frame [map]++;
+							button_refresh [map] = 1;
+							if (old_map != BUTTON_NONE) {
+								button_frame [old_map]--;
+								button_refresh [old_map] = 1;
+							}
+						} else if (last_button == old_map) {
+							button_frame [old_map]--;
+							button_refresh [old_map] = 1;
+						} else if (last_button == map) {
+							button_frame [map]++;
+							button_refresh [map] = 1;
+						}
+					}
+					old_map = map;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					/* Tengo un Mouse Down */
+					if (event.button.button != SDL_BUTTON_LEFT) break;
+					last_button = map_button_in_finish (event.button.x, event.button.y);
+					
+					if (last_button != BUTTON_NONE) {
+						button_frame [last_button]++;
+						button_refresh [last_button] = 1;
+					}
+					break;
+				case SDL_MOUSEBUTTONUP:
+					/* Tengo un mouse Up */
+					if (event.button.button != SDL_BUTTON_LEFT) break;
+					if (last_button != BUTTON_NONE) {
+						map = map_button_in_finish (event.motion.x, event.motion.y);
+						
+						button_frame [last_button]--;
+						button_refresh [last_button] = 1;
+						if (map == last_button) {
+							/* Switch del boton */
+							
+							if (last_button == BUTTON_CLOSE) {
+								done = GAME_QUIT;
+							} else if (last_button == BUTTON_UI_DONE) {
+								done = GAME_QUIT;
+							}
+						} else if (map != BUTTON_NONE) {
+							button_frame [map]++;
+							button_refresh [map] = 1;
+						}
+						
+						last_button = BUTTON_NONE;
+					}
+					break;
+			}
+		}
+		
+		/* Dibujar el botón de cierre */
+		/* Posición original X:734, Y:22
+		 * Centro +- 14.05 */
+		if (button_refresh [BUTTON_CLOSE]) {
+			dest_rect.x = 720; dest_rect.y = 8;
+			dest_rect.h = images [IMG_CLOSE_BUTTON_UP]->h; dest_rect.w = images [IMG_CLOSE_BUTTON_UP]->w;
+			SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], &dest_rect, screen, &dest_rect);
+			SDL_BlitSurface (grey_screen, &dest_rect, screen, &dest_rect);
+			SDL_BlitSurface (images [button_frame [BUTTON_CLOSE]], NULL, screen, &dest_rect);
+			button_refresh [BUTTON_CLOSE] = 0;
+		}
+		
+		/* Dibujar el botón de "DONE" */
+		/* Posición original: X:249.45, Y:360.8 */
+		if (button_refresh [BUTTON_UI_DONE]) {
+			dest_rect.x = 250; dest_rect.y = 361;
+			dest_rect.h = images [IMG_BUTTON_UI_UP]->h; dest_rect.w = images [IMG_BUTTON_UI_UP]->w;
+			SDL_FillRect (screen, &dest_rect,
+				          SDL_MapRGB (screen->format, 0xf0, 0xc4, 0x3f));
+			SDL_BlitSurface (images [button_frame [BUTTON_UI_DONE]], NULL, screen, &dest_rect);
+			dest_rect.x = 332 - (done_text_button->w / 2); dest_rect.y = 373;
+			dest_rect.h = done_text_button->h; dest_rect.w = done_text_button->w;
+			SDL_BlitSurface (done_text_button, NULL, screen, &dest_rect);
+			button_refresh [BUTTON_UI_DONE] = 0;
+		}
+		
+		SDL_Flip (screen);
+		
+		now_time = SDL_GetTicks ();
+		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
+		
+	} while (!done);
+	
+	SDL_FreeSurface (done_text_button);
+	return done;
+}
+
+int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets) {
 	int done = 0;
 	SDL_Event event;
 	SDLKey key;
@@ -870,6 +1069,10 @@ int game_loop (void) {
 			done = GAME_CONTINUE;
 			
 			tickets = bounces + most_puffles * role;
+			*ret_tickets = tickets;
+			*ret_bounces = bounces;
+			*ret_most = most_puffles;
+			*ret_role = role;
 			/* TODO: Fin del juego, todos los puffles perdidos */
 			break;
 		}
@@ -1295,5 +1498,12 @@ inline int map_button_in_opening (int x, int y) {
 	/* Checar por el botón de cierre */
 	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
 	if (x >= 299 && x < 462 && y >= 360 && y < 407) return BUTTON_UI_PLAY;
+	return BUTTON_NONE;
+}
+
+inline int map_button_in_finish (int x, int y) {
+	/* Checar por el botón de cierre */
+	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
+	if (x >= 250 && x < 413 && y >= 361 && y < 408) return BUTTON_UI_DONE;
 	return BUTTON_NONE;
 }

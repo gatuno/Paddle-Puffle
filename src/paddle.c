@@ -50,6 +50,8 @@ enum {
 	
 	IMG_TITLE_OPENING,
 	
+	IMG_NOTE,
+	
 	IMG_BACKGROUND_NORMAL,
 	IMG_BACKGROUND_NEW_0,
 	IMG_BACKGROUND_NEW_1,
@@ -168,6 +170,8 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/title.png",
 	
 	GAMEDATA_DIR "images/title-opening.png",
+	
+	GAMEDATA_DIR "images/note.png",
 	
 	GAMEDATA_DIR "images/normal.png",
 	GAMEDATA_DIR "images/new-0.png",
@@ -718,7 +722,7 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 	SDL_Rect dest_rect;
 	Uint32 last_time, now_time;
 	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
-	SDL_Surface *done_text_button;
+	SDL_Surface *done_text_button, *text_num;
 	char text_buffer [6];
 	
 	/* Texto traducible */
@@ -728,6 +732,14 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 	
 	/* Primero el background */
 	SDL_BlitSurface (images [IMG_BACKGROUND_NORMAL], NULL, screen, NULL);
+	
+	sprintf (text_buffer, "%d", tickets);
+	text_num = draw_text_with_shadow (ttf16_normal, ttf16_outline, text_buffer);
+	dest_rect.x = 607 + ((136 - text_num->w) / 2);
+	dest_rect.y = 60 + ((26 - text_num->h) / 2);
+	dest_rect.w = text_num->w; dest_rect.h = text_num->h;
+	SDL_BlitSurface (text_num, NULL, screen, &dest_rect);
+	SDL_FreeSurface (text_num);
 	
 	/* Luego la pantalla negra */
 	SDL_BlitSurface (grey_screen, NULL, screen, NULL);
@@ -739,6 +751,13 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 	dest_rect.w = images [IMG_TITLE_OPENING]->w;
 	
 	SDL_BlitSurface (images [IMG_TITLE_OPENING], NULL, screen, &dest_rect);
+	
+	dest_rect.x = 420;
+	dest_rect.y = 342;
+	dest_rect.h = images [IMG_NOTE]->h;
+	dest_rect.h = images [IMG_NOTE]->h;
+	
+	SDL_BlitSurface (images [IMG_NOTE], NULL, screen, &dest_rect);
 	
 	/* Luego todos los textos */
 	/* El primero Bounce point, x = 122, y = 175 */
@@ -768,6 +787,39 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 	dest_rect.y = 288;
 	dest_rect.h = texts[TEXT_SCORE_TOTAL_TICKETS]->h;
 	SDL_BlitSurface (texts[TEXT_SCORE_TOTAL_TICKETS], NULL, screen, &dest_rect);
+	
+	/* Imprimir los resultados */
+	sprintf (text_buffer, "%d", bounces);
+	text_num = draw_text (ttf14_normal, text_buffer, &negro);
+	dest_rect.x = 565 - (text_num->w / 2);
+	dest_rect.y = 175;
+	dest_rect.w = text_num->w; dest_rect.h = text_num->h;
+	SDL_BlitSurface (text_num, NULL, screen, &dest_rect);
+	SDL_FreeSurface (text_num);
+	
+	sprintf (text_buffer, "%d", most_puffles);
+	text_num = draw_text (ttf14_normal, text_buffer, &negro);
+	dest_rect.x = 565 - (text_num->w / 2);
+	dest_rect.y = 203;
+	dest_rect.w = text_num->w; dest_rect.h = text_num->h;
+	SDL_BlitSurface (text_num, NULL, screen, &dest_rect);
+	SDL_FreeSurface (text_num);
+	
+	sprintf (text_buffer, "%d", role);
+	text_num = draw_text (ttf14_normal, text_buffer, &negro);
+	dest_rect.x = 565 - (text_num->w / 2);
+	dest_rect.y = 231;
+	dest_rect.w = text_num->w; dest_rect.h = text_num->h;
+	SDL_BlitSurface (text_num, NULL, screen, &dest_rect);
+	SDL_FreeSurface (text_num);
+	
+	sprintf (text_buffer, "%d", tickets);
+	text_num = draw_text (ttf26_normal, text_buffer, &negro);
+	dest_rect.x = 575 - (text_num->w / 2);
+	dest_rect.y = 288;
+	dest_rect.w = text_num->w; dest_rect.h = text_num->h;
+	SDL_BlitSurface (text_num, NULL, screen, &dest_rect);
+	SDL_FreeSurface (text_num);
 	
 	/* El boton de cerrar */
 	dest_rect.x = 720; dest_rect.y = 8;
@@ -1073,7 +1125,6 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			*ret_bounces = bounces;
 			*ret_most = most_puffles;
 			*ret_role = role;
-			/* TODO: Fin del juego, todos los puffles perdidos */
 			break;
 		}
 		
@@ -1402,8 +1453,6 @@ void setup (void) {
 	}
 	
 	TTF_CloseFont (ttf10);
-	TTF_CloseFont (ttf14);
-	TTF_CloseFont (ttf26);
 	
 	/* Copiar la palabra "Tickets" en el background */
 	rect.x = 607 + ((135 - texts[TEXT_TICKETS]->w) / 2); rect.y = 38;
@@ -1414,6 +1463,8 @@ void setup (void) {
 	
 	/* Dejar abiertas las otras tipografias */
 	ttf16_normal = ttf16;
+	ttf14_normal = ttf14;
+	ttf26_normal = ttf26;
 	ttf20_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
 	ttf20_outline = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
 	ttf16_outline = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);

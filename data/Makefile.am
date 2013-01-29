@@ -98,6 +98,7 @@ nobase_dist_gamedata_DATA = images/fail-0.png \
 	images/title.png \
 	images/title-opening.png \
 	images/note.png \
+	images/icon.png \
 	ccfacefront.ttf \
 	music/carnie.ogg \
 	sounds/oldboing.wav \

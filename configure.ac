@@ -1,4 +1,4 @@
-AC_INIT([Paddle Puffle], [0.1], [], [paddle-puffle])
+AC_INIT([Paddle Puffle], [0.8], [], [paddle-puffle])
 
 AC_REVISION([Revision 1])
 

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Name=Paddle Puffle
+Icon=paddle
+Comment=Play Paddle Puffle
+Exec=paddle-puffle
+Categories=Game;

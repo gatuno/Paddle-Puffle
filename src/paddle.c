@@ -1036,6 +1036,27 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 						last_button = BUTTON_NONE;
 					}
 					break;
+				case SDL_KEYDOWN:
+					/* Tengo una tecla presionada */
+					key = event.key.keysym.sym;
+					
+					if (key == SDLK_z) {
+						fprintf (stderr, "Sending new background\n");
+						background_frame = background_frames [background_frame][BACKGROUND_NEW];
+					} else if (key == SDLK_x) {
+						fprintf (stderr, "Sending fail background\n");
+						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
+					}
+					
+					if (key == SDLK_q) {
+						fprintf (stderr, "Bounces = 60, activando wind\n");
+						bounces = 60; /* Debug key */
+					} else if (key == SDLK_w) {
+						fprintf (stderr, "Bounces = 0, desactivando wind\n");
+						bounces = 0;
+					}
+					/* TODO: Toggle Fullscreen */
+					break;
 			}
 		}
 		
@@ -1295,7 +1316,7 @@ void setup (void) {
 	SDL_Surface * image;
 	TTF_Font *ttf10, *ttf14, *ttf16, *ttf26, *temp_font;
 	SDL_Color color;
-	SDL_Rect rect;
+	SDL_Rect rect, rect2;
 	int g;
 	
 	/* Inicializar el Video SDL */
@@ -1337,7 +1358,7 @@ void setup (void) {
 		/* Inicializar el sonido */
 		if (Mix_OpenAudio (22050, AUDIO_S16, 2, 4096) < 0) {
 			fprintf (stdout,
-				"Advertencia: <Poner un mensaje de error descriptivo>\n");
+				"Advertencia: No se pudo inicializar la SDL Mixer\n");
 			use_sound = 0;
 		}
 	}
@@ -1442,11 +1463,19 @@ void setup (void) {
 	TTF_CloseFont (ttf10);
 	
 	/* Copiar la palabra "Tickets" en el background */
+	/* También copiar el nombre del juego al titulo y al fondo */
 	rect.x = 607 + ((135 - texts[TEXT_TICKETS]->w) / 2); rect.y = 38;
 	rect.w = texts[TEXT_TICKETS]->w; rect.h = texts[TEXT_TICKETS]->h;
+	rect2.x = 191; rect2.y = 96;
+	rect2.w = images[IMG_TITLE]->w; rect2.h = images[IMG_TITLE]->h;
 	for (g = IMG_BACKGROUND_NORMAL; g <= IMG_BACKGROUND_FAIL_1; g++) {
 		SDL_BlitSurface (texts[TEXT_TICKETS], NULL, images[g], &rect);
+		SDL_BlitSurface (images[IMG_TITLE], NULL, images[g], &rect2);
 	}
+	
+	/* X = 84.35, Y = 50.85 */
+	rect2.x = 84; rect2.y = 51;
+	SDL_BlitSurface (images[IMG_TITLE], NULL, images[IMG_TITLE_OPENING], &rect2);
 	
 	/* Dejar abiertas las otras tipografias */
 	ttf16_normal = ttf16;

@@ -40,6 +40,12 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 
+#include "config.h"
+
+#include <locale.h>
+#include "gettext.h"
+#define _(string) gettext (string)
+
 #include "draw-text.h"
 
 #define FPS (1000/24)
@@ -447,17 +453,6 @@ enum {
 	NUM_TEXTS
 };
 
-/* Estas cadenas son traducibles */
-const char * text_strings[NUM_TEXTS] = {
-	"- USE YOUR MOUSE TO BOUNCE THE \n  PUFFLES AND KEEP THEM IN THE AIR \n\n- EVERY TIME YOU BOUNCE A PUFFLE \n  YOU INCREASE YOUR SCORE \n\n- JUGGLE MORE AT ONCE TO WIN MORE \n\n- THE LONGER YOU CAN KEEP BOUNCING \n  THE SAME PUFFLE THE MORE YOU WIN",
-	"WARNING! \n\nFIXME: CHANGE THIS \nTEXT.",
-	"TICKETS",
-	"BOUNCE POINTS:",
-	"MOST BOUNCED PUFFLE:",
-	"PUFFLES JUGGLED:",
-	"TOTAL TICKETS:"
-};
-
 static int text_info [NUM_TEXTS] = { /* Tamaño, por el momento */
 	14,
 	10,
@@ -528,6 +523,13 @@ TTF_Font *ttf14_normal, *ttf26_normal;
 int main (int argc, char *argv[]) {
 	int bounces, role, most, tickets;
 	
+	/* Inicializar l18n */
+	
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	
+	textdomain (PACKAGE);
+	
 	setup ();
 	do {
 		if (game_intro () == GAME_QUIT) break;
@@ -548,7 +550,7 @@ int game_intro (void) {
 	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
 	SDL_Surface *play_text_button;
 	
-	play_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, "PLAY");
+	play_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, _("PLAY"));
 	
 	/* Iniciar la música */
 	if (use_sound) {
@@ -734,7 +736,7 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 	char text_buffer [6];
 	
 	/* Texto traducible */
-	done_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, "DONE");
+	done_text_button = draw_text_with_shadow (ttf20_normal, ttf20_outline, _("DONE"));
 	
 	/* Preparar el escenario */
 	
@@ -1319,12 +1321,24 @@ void setup (void) {
 	SDL_Rect rect, rect2;
 	int g;
 	
+	
+	/* Estas cadenas son traducibles */
+	const char * text_strings[NUM_TEXTS] = {
+		_("- USE YOUR MOUSE TO BOUNCE THE \n  PUFFLES AND KEEP THEM IN THE AIR \n\n- EVERY TIME YOU BOUNCE A PUFFLE \n  YOU INCREASE YOUR SCORE \n\n- JUGGLE MORE AT ONCE TO WIN MORE \n\n- THE LONGER YOU CAN KEEP BOUNCING \n  THE SAME PUFFLE THE MORE YOU WIN"),
+		_("WARNING! \n\nFIXME: CHANGE THIS \nTEXT."),
+		_("TICKETS"),
+		_("BOUNCE POINTS:"),
+		_("MOST BOUNCED PUFFLE:"),
+		_("PUFFLES JUGGLED:"),
+		_("TOTAL TICKETS:")
+	};
+
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf (stderr,
-			"Error: No se pudo inicializar el sistema de video\n"
-			"El error devuelto por SDL es:\n"
-			"%s\n", SDL_GetError());
+			_("Error: Can't initialize the video subsystem\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), SDL_GetError());
 		exit (1);
 	}
 	
@@ -1333,24 +1347,24 @@ void setup (void) {
 		SDL_WM_SetIcon (image, NULL);
 		SDL_FreeSurface (image);
 	}
-	SDL_WM_SetCaption ("Paddle Puffle", "Paddle Puffle");
+	SDL_WM_SetCaption (_("Paddle Puffle"), _("Paddle Puffle"));
 	
 	/* Crear la pantalla de dibujado */
 	screen = set_video_mode (0);
 	
 	if (screen == NULL) {
 		fprintf (stderr,
-			"Error: I could not set up video for 760x480 mode.\n"
-			"The Simple DirectMedia error that occured was:\n"
-			"%s\n", SDL_GetError());
+			_("Error: Can't setup 760x480 video mode.\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), SDL_GetError());
 		exit (1);
 	}
 	
 	use_sound = 1;
 	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
 		fprintf (stdout,
-			"Advertencia: No se pudo inicializar el sistema de audio\n"
-			"Continuando...\n");
+			_("Warning: Can't initialize the audio subsystem\n"
+			"Continuing...\n"));
 		use_sound = 0;
 	}
 	
@@ -1358,7 +1372,7 @@ void setup (void) {
 		/* Inicializar el sonido */
 		if (Mix_OpenAudio (22050, AUDIO_S16, 2, 4096) < 0) {
 			fprintf (stdout,
-				"Advertencia: No se pudo inicializar la SDL Mixer\n");
+				_("Warning: Can't initialize the SDL Mixer library\n"));
 			use_sound = 0;
 		}
 	}
@@ -1368,10 +1382,10 @@ void setup (void) {
 		
 		if (image == NULL) {
 			fprintf (stderr,
-				"Error al cargar el archivo:\n"
+				_("Failed to load data file:\n"
 				"%s\n"
-				"El error devuelto por SDL es:\n"
-				"%s\n", images_names[g], SDL_GetError());
+				"The error returned by SDL is:\n"
+				"%s\n"), images_names[g], SDL_GetError());
 			SDL_Quit ();
 			exit (1);
 		}
@@ -1392,10 +1406,10 @@ void setup (void) {
 			
 			if (sounds[g] == NULL) {
 				fprintf (stderr,
-					"Error: No se pudo cargar un archivo de sonido:\n"
+					_("Failed to load data file:\n"
 					"%s\n"
-					"El error devuelto por SDL es:\n"
-					"%s\n", sound_names [g], SDL_GetError ());
+					"The error returned by SDL is:\n"
+					"%s\n"), sound_names [g], SDL_GetError ());
 				SDL_Quit ();
 				exit (1);
 			}
@@ -1408,10 +1422,10 @@ void setup (void) {
 		
 		if (mus_carnie == NULL) {
 			fprintf (stderr,
-				"Error: No se pudo cargar un archivo de sonido:\n"
+				_("Failed to load data file:\n"
 				"%s\n"
-				"El error devuelto por SDL es:\n"
-				"%s\n", MUS_CARNIE, SDL_GetError ());
+				"The error returned by SDL is:\n"
+				"%s\n"), MUS_CARNIE, SDL_GetError ());
 			SDL_Quit ();
 			exit (1);
 		}
@@ -1420,8 +1434,8 @@ void setup (void) {
 	
 	if (TTF_Init () < 0) {
 		fprintf (stderr,
-			"Error: No se pudo inicializar la librería SDL_ttf\n"
-			"%s\n", TTF_GetError ());
+			_("Error: Can't initialize the SDL TTF library\n"
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
@@ -1434,9 +1448,9 @@ void setup (void) {
 	
 	if (!ttf10 || !ttf14 || !ttf16 || !ttf26) {
 		fprintf (stderr,
-			"Error: No se pudo cargar la tipografía 'CCFaceFront'\n"
-			"El error devuelto por SDL es:\n"
-			"%s\n", TTF_GetError ());
+			_("Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
@@ -1487,9 +1501,9 @@ void setup (void) {
 	
 	if (!ttf20_normal || !ttf20_outline || !ttf16_outline) {
 		fprintf (stderr,
-			"Error: No se pudo cargar la tipografía 'CCFaceFront'\n"
-			"El error devuelto por SDL es:\n"
-			"%s\n", TTF_GetError ());
+			_("Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}

@@ -20,3 +20,7 @@ config.status
 src/paddle-puffle
 *.o
 stamp-h1
+
+*~
+
+m4

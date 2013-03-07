@@ -1,6 +1,6 @@
-AC_INIT([Paddle Puffle], [0.8], [], [paddle-puffle])
+AC_INIT([Paddle Puffle], [0.9], [], [paddle-puffle])
 
-AC_REVISION([Revision 1])
+AC_REVISION([Revision 9])
 
 AC_CONFIG_AUX_DIR([build-aux])
 
@@ -14,6 +14,10 @@ AC_PROG_CC
 
 # and automake
 AM_INIT_AUTOMAKE([-Wall -Werror])
+
+# Translate this program
+AM_GNU_GETTEXT_VERSION([0.18.1])
+AM_GNU_GETTEXT([external])
 
 AM_PROG_CC_C_O
 
@@ -51,6 +55,7 @@ AC_CONFIG_FILES([
                  Makefile
                  src/Makefile
                  data/Makefile
+                 po/Makefile.in
 ])
 
 AC_OUTPUT

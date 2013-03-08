@@ -39,3 +39,4 @@ po/remove-potcdate.sin
 po/stamp-po
 
 *.gmo
+*.mo

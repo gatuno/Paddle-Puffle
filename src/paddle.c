@@ -49,6 +49,7 @@
 #include "draw-text.h"
 
 #define FPS (1000/24)
+#define MAX_RECTS 256
 
 /* Enumerar las imágenes */
 enum {
@@ -502,6 +503,7 @@ void eliminar_puffle (Puffle *p);
 int map_button_in_game (int x, int y);
 int map_button_in_opening (int x, int y);
 int map_button_in_finish (int x, int y);
+void add_rect(SDL_Rect *rect);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -512,6 +514,10 @@ Puffle *last_puffle = NULL;
 int background_frame = 0;
 int use_sound;
 SDL_Surface *grey_screen;
+
+SDL_Rect rects[MAX_RECTS];
+int num_rects = 0;
+int whole_flip = 0;
 
 Mix_Chunk * sounds[NUM_SOUNDS];
 Mix_Music * mus_carnie;
@@ -1009,8 +1015,6 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 	do {
 		last_time = SDL_GetTicks ();
 		
-		SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
-		
 		while (SDL_PollEvent(&event) > 0) {
 			switch (event.type) {
 				case SDL_QUIT:
@@ -1045,9 +1049,11 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					if (key == SDLK_z) {
 						fprintf (stderr, "Sending new background\n");
 						background_frame = background_frames [background_frame][BACKGROUND_NEW];
+						whole_flip = 1;
 					} else if (key == SDLK_x) {
 						fprintf (stderr, "Sending fail background\n");
 						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
+						whole_flip = 1;
 					}
 					
 					if (key == SDLK_q) {
@@ -1142,8 +1148,26 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			break;
 		}
 		
+		if (background_frame != 0) whole_flip = 1;
+		
+		/* Avanzar el escenario */
+		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
+		
+		if (whole_flip) {
+			SDL_BlitSurface (images [background_outputs[background_frame]], NULL, screen, NULL);
+		}
+		
 		thispuffle = first_puffle;
 		do {
+			/* Borrar los puffles */
+			puf_pos.x = thispuffle->x - 48; /* Constante temporal */
+			puf_pos.y = thispuffle->y - 60; /* Constante temporal */
+			puf_pos.w = images [IMG_BLUE_NORMAL_1]->w;
+			puf_pos.h = images [IMG_BLUE_NORMAL_1]->h;
+			SDL_BlitSurface (images [background_outputs[background_frame]], &puf_pos, screen, &puf_pos);
+			add_rect (&puf_pos);
+			
+			/* Avanzar de posición los puffles */
 			thispuffle->x = thispuffle->x + thispuffle->x_virtual;
 			thispuffle->y = thispuffle->y + thispuffle->y_virtual;
 			
@@ -1237,6 +1261,29 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			if (thispuffle != NULL) thispuffle = thispuffle->next;
 		} while (thispuffle != NULL);
 		
+		/* Pre-borrar la cantidad de tickets */
+		puf_pos.x = 607; puf_pos.y = 59;
+		puf_pos.w = 136; puf_pos.h = 26;
+		
+		SDL_BlitSurface (images [background_outputs[background_frame]], &puf_pos, screen, &puf_pos);
+		add_rect (&puf_pos);
+		
+		/* Preborrar la paleta */
+		puf_pos.x = paddle_x - 58; puf_pos.y = paddle_y - 70;
+		puf_pos.h = images [IMG_PADDLE_1]->h;
+		puf_pos.w = images [IMG_PADDLE_1]->w;
+		
+		SDL_BlitSurface (images [background_outputs[background_frame]], &puf_pos, screen, &puf_pos);
+		add_rect (&puf_pos);
+		
+		/* Pre-borrar el botón de cierre */
+		puf_pos.x = 720; puf_pos.y = 8;
+		puf_pos.h = images[IMG_CLOSE_BUTTON_UP]->h;
+		puf_pos.w = images[IMG_CLOSE_BUTTON_UP]->w;
+		
+		SDL_BlitSurface (images [background_outputs[background_frame]], &puf_pos, screen, &puf_pos);
+		add_rect (&puf_pos);
+		
 		/* Dibujar la cantidad de tickets */
 		sprintf (text_buffer, "%d", tickets);
 		text_num = draw_text_with_shadow (ttf16_normal, ttf16_outline, text_buffer);
@@ -1245,6 +1292,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		puf_pos.w = text_num->w; puf_pos.h = text_num->h;
 		
 		SDL_BlitSurface (text_num, NULL, screen, &puf_pos);
+		add_rect (&puf_pos);
 		SDL_FreeSurface (text_num);
 		
 		paddle_x = handposx;
@@ -1255,10 +1303,11 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		/* Blit el paddle */
 		puf_pos.x = paddle_x - 58; /* Constante temporal */
 		puf_pos.y = paddle_y - 70; /* Constante temporal */
-		puf_pos.h = images [paddle_outputs [paddle_frame]]->h;
-		puf_pos.w = images [paddle_outputs [paddle_frame]]->w;
+		puf_pos.h = images [IMG_PADDLE_1]->h;
+		puf_pos.w = images [IMG_PADDLE_1]->w;
 		
 		SDL_BlitSurface (images [paddle_outputs [paddle_frame]], NULL, screen, &puf_pos);
+		add_rect (&puf_pos);
 		
 		/* Dibujar el botón de cierre */
 		/* Posición original X:734, Y:22
@@ -1276,6 +1325,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			button_frame = IMG_CLOSE_BUTTON_UP;
 		}
 		SDL_BlitSurface (images[button_frame], NULL, screen, &puf_pos);
+		add_rect (&puf_pos);
 		
 		thispuffle = first_puffle;
 		do {
@@ -1286,15 +1336,19 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 				puf_pos.w = images [puffle_outputs [thispuffle->frame]]->w;
 				puf_pos.h = images [puffle_outputs [thispuffle->frame]]->h;
 				SDL_BlitSurface (images [puffle_outputs [thispuffle->frame] + (thispuffle->color * 8)], NULL, screen, &puf_pos);
+				add_rect (&puf_pos);
 			}
 			
 			if (thispuffle != NULL) thispuffle = thispuffle->next;
 		} while (thispuffle != NULL);
 		
-		/* Avanzar el escenario */
-		background_frame = background_frames [background_frame][BACKGROUND_NORMAL];
-		
-		SDL_Flip (screen);
+		if (whole_flip) {
+			whole_flip = 0;
+			SDL_Flip (screen);
+		} else {
+			SDL_UpdateRects (screen, num_rects, rects);
+			num_rects = 0;
+		}
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
@@ -1546,6 +1600,7 @@ void nuevo_puffle (void) {
 	
 	/* Background, dame un "more" */
 	background_frame = background_frames [background_frame][BACKGROUND_NEW];
+	whole_flip = 1;
 }
 
 void eliminar_puffle (Puffle *p) {
@@ -1567,6 +1622,7 @@ void eliminar_puffle (Puffle *p) {
 	
 	/* Background, dame un "miss" */
 	background_frame = background_frames [background_frame][BACKGROUND_FAIL];
+	whole_flip = 1;
 }
 
 inline int map_button_in_game (int x, int y) {
@@ -1587,5 +1643,15 @@ inline int map_button_in_finish (int x, int y) {
 	if (x >= 720 && x < 748 && y >= 8 && y < 36) return BUTTON_CLOSE;
 	if (x >= 250 && x < 413 && y >= 361 && y < 408) return BUTTON_UI_DONE;
 	return BUTTON_NONE;
+}
+
+void add_rect(SDL_Rect *rect) {
+	if (whole_flip) return;
+	if (num_rects + 1 > MAX_RECTS) {
+		whole_flip = 1;
+		return;
+	} else {
+		rects [num_rects++] = *rect;
+	}
 }
 

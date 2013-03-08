@@ -1,4 +1,4 @@
-# Spanish translations for paddle-puffle package.
+# German translations for paddle-puffle package.
 # Copyright (C) 2013 Free Software Foundation, Inc.
 # This file is distributed under the same license as the paddle-puffle package.
 # Félix Arreola Rodríguez <gatuno_123@esdebian.org>, 2013.
@@ -8,10 +8,10 @@ msgstr ""
 "Project-Id-Version: paddle-puffle 0.9\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-03-08 14:37-0600\n"
-"PO-Revision-Date: 2013-03-08 11:50-0600\n"
-"Last-Translator: Flix Arreola Rodrguez <gatuno_123@esdebian.org>\n"
-"Language-Team: Spanish\n"
-"Language: es\n"
+"PO-Revision-Date: 2013-03-08 14:30-0600\n"
+"Last-Translator: Félix Arreola Rodrguez <gatuno_123@esdebian.org>\n"
+"Language-Team: German\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,11 +19,11 @@ msgstr ""
 
 #: src/paddle.c:559
 msgid "PLAY"
-msgstr "JUGAR"
+msgstr "SPIELEN"
 
 #: src/paddle.c:745
 msgid "DONE"
-msgstr "LISTO"
+msgstr "FERTIG"
 
 #: src/paddle.c:1381
 msgid ""
@@ -38,16 +38,16 @@ msgid ""
 "- THE LONGER YOU CAN KEEP BOUNCING \n"
 "  THE SAME PUFFLE THE MORE YOU WIN"
 msgstr ""
-"- CON TU MOUSE, HAZ QUE LOS PUFFLES \n"
-"  REBOTEN Y SE MANTENGAN EN EL AIRE \n"
+"- BEWEGE DEINE MAUS, UM DIE \n"
+"  PUFFLES IN DER LUFT ZU HALTEN. \n"
 "\n"
-"- POR CADA PUFFLE QUE HAGAS REBOTAR \n"
-"  GANAS MÁS PUNTOS \n"
+"- BEI JEDEM SPRUNG EINES PUFFLES \n"
+"  STEIGT DEINE PUNKTZAHL. \n"
 "\n"
-"- MALABAREA CON VARIOS PARA MÁS PUNTOS\n"
+"- MEHRERE PUFFLES = MEHR PUNKTE \n"
 "\n"
-"- CUANTO MÁS REBOTE UN MISMO PUFFLE, \n"
-"  MÁS PUNTOS GANARÁS"
+"- JE LÄNGER DU MIT DEMSELBEN PUFFLE \n"
+"  SPIELST, DESTO MEHR GEWINNST DU."
 
 #: src/paddle.c:1382
 msgid ""
@@ -56,30 +56,26 @@ msgid ""
 "FIXME: CHANGE THIS \n"
 "TEXT."
 msgstr ""
-"¡Advertencia! \n"
-"\n"
-"ARREGLAME: CAMBIA \n"
-"ESTE TEXTO."
 
 #: src/paddle.c:1383
 msgid "TICKETS"
-msgstr "BILLETES"
+msgstr "TICKETS"
 
 #: src/paddle.c:1384
 msgid "BOUNCE POINTS:"
-msgstr "PUNTOS POR REBOTE:"
+msgstr "PUNKTE:"
 
 #: src/paddle.c:1385
 msgid "MOST BOUNCED PUFFLE:"
-msgstr "PUFFLE QUE MÁS HA REBOTADO:"
+msgstr "MEISTE PUFFLE-SPRÜNGE:"
 
 #: src/paddle.c:1386
 msgid "PUFFLES JUGGLED:"
-msgstr "CANTIDAD DE PUFFLES:"
+msgstr "PUFFLES GLEICHZEITIG:"
 
 #: src/paddle.c:1387
 msgid "TOTAL TICKETS:"
-msgstr "TOTAL:"
+msgstr "GESAMTE TICKETS:"
 
 #: src/paddle.c:1393
 #, c-format
@@ -88,9 +84,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Error: No se pudo inicializar el sistema de video\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/paddle.c:1404
 msgid "Paddle Puffle"
@@ -103,9 +96,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Error: No se pudo establecer el modo de video 760x480.\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/paddle.c:1420
 #, c-format
@@ -113,13 +103,11 @@ msgid ""
 "Warning: Can't initialize the audio subsystem\n"
 "Continuing...\n"
 msgstr ""
-"Advertencia: No se pudo inicializar el sistema de audio\n"
-"Continuando...\n"
 
 #: src/paddle.c:1429
 #, c-format
 msgid "Warning: Can't initialize the SDL Mixer library\n"
-msgstr "Advertencia: No se pudo inicializar la biblioteca SDL Mixer\n"
+msgstr ""
 
 #: src/paddle.c:1439 src/paddle.c:1463 src/paddle.c:1479
 #, c-format
@@ -129,10 +117,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Falló al cargar el archivo de datos:\n"
-"%s\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/paddle.c:1491
 #, c-format
@@ -140,8 +124,6 @@ msgid ""
 "Error: Can't initialize the SDL TTF library\n"
 "%s\n"
 msgstr ""
-"Error: No se pudo inicializar la biblioteca SDL TFF\n"
-"%s\n"
 
 #: src/paddle.c:1505 src/paddle.c:1558
 #, c-format
@@ -150,6 +132,3 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Falló al cargar la tipografía 'CCFaceFront'\n"
-"El error regresado por SDL es:\n"
-"%s\n"

@@ -691,6 +691,11 @@ int game_intro (void) {
 						last_button = BUTTON_NONE;
 					}
 					break;
+				case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE) {
+					done = GAME_QUIT;
+				}
+				break;
 			}
 		}
 		

@@ -141,4 +141,5 @@ EXTRA_DIST = \
 	desktop/48x48/paddle.png		\
 	desktop/64x64/paddle.png		\
 	desktop/128x128/paddle.png		\
-	desktop/256x256/paddle.png
+	desktop/256x256/paddle.png		\
+	paddle.ico

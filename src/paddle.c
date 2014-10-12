@@ -171,8 +171,12 @@ enum {
 	NUM_IMAGES
 };
 
-/* Los nombres de archivos */
+#ifdef __MINGW32__
+#	undef GAMEDATA_DIR
+#	define GAMEDATA_DIR "./"
+#endif
 
+/* Los nombres de archivos */
 const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/title.png",
 	
@@ -1051,7 +1055,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					/* Tengo una tecla presionada */
 					key = event.key.keysym.sym;
 					
-					if (key == SDLK_z) {
+					/*if (key == SDLK_z) {
 						fprintf (stderr, "Sending new background\n");
 						background_frame = background_frames [background_frame][BACKGROUND_NEW];
 						whole_flip = 1;
@@ -1059,15 +1063,15 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 						fprintf (stderr, "Sending fail background\n");
 						background_frame = background_frames [background_frame][BACKGROUND_FAIL];
 						whole_flip = 1;
-					}
+					}*/
 					
-					if (key == SDLK_q) {
+					/*if (key == SDLK_q) {
 						fprintf (stderr, "Bounces = 60, activando wind\n");
-						bounces = 60; /* Debug key */
+						bounces = 60;
 					} else if (key == SDLK_w) {
 						fprintf (stderr, "Bounces = 0, desactivando wind\n");
 						bounces = 0;
-					}
+					}*/
 					/* TODO: Toggle Fullscreen */
 					break;
 			}

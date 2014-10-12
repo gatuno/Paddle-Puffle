@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: paddle-puffle 0.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-08 14:37-0600\n"
+"POT-Creation-Date: 2014-10-11 19:57-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/paddle.c:559
+#: src/paddle.c:563
 msgid "PLAY"
 msgstr ""
 
-#: src/paddle.c:745
+#: src/paddle.c:754
 msgid "DONE"
 msgstr ""
 
-#: src/paddle.c:1381
+#: src/paddle.c:1390
 msgid ""
 "- USE YOUR MOUSE TO BOUNCE THE \n"
 "  PUFFLES AND KEEP THEM IN THE AIR \n"
@@ -39,7 +39,7 @@ msgid ""
 "  THE SAME PUFFLE THE MORE YOU WIN"
 msgstr ""
 
-#: src/paddle.c:1382
+#: src/paddle.c:1391
 msgid ""
 "WARNING! \n"
 "\n"
@@ -47,27 +47,27 @@ msgid ""
 "TEXT."
 msgstr ""
 
-#: src/paddle.c:1383
+#: src/paddle.c:1392
 msgid "TICKETS"
 msgstr ""
 
-#: src/paddle.c:1384
+#: src/paddle.c:1393
 msgid "BOUNCE POINTS:"
 msgstr ""
 
-#: src/paddle.c:1385
+#: src/paddle.c:1394
 msgid "MOST BOUNCED PUFFLE:"
 msgstr ""
 
-#: src/paddle.c:1386
+#: src/paddle.c:1395
 msgid "PUFFLES JUGGLED:"
 msgstr ""
 
-#: src/paddle.c:1387
+#: src/paddle.c:1396
 msgid "TOTAL TICKETS:"
 msgstr ""
 
-#: src/paddle.c:1393
+#: src/paddle.c:1402
 #, c-format
 msgid ""
 "Error: Can't initialize the video subsystem\n"
@@ -75,11 +75,11 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/paddle.c:1404
+#: src/paddle.c:1413
 msgid "Paddle Puffle"
 msgstr ""
 
-#: src/paddle.c:1411
+#: src/paddle.c:1420
 #, c-format
 msgid ""
 "Error: Can't setup 760x480 video mode.\n"
@@ -87,19 +87,19 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/paddle.c:1420
+#: src/paddle.c:1429
 #, c-format
 msgid ""
 "Warning: Can't initialize the audio subsystem\n"
 "Continuing...\n"
 msgstr ""
 
-#: src/paddle.c:1429
+#: src/paddle.c:1438
 #, c-format
 msgid "Warning: Can't initialize the SDL Mixer library\n"
 msgstr ""
 
-#: src/paddle.c:1439 src/paddle.c:1463 src/paddle.c:1479
+#: src/paddle.c:1448 src/paddle.c:1472 src/paddle.c:1488
 #, c-format
 msgid ""
 "Failed to load data file:\n"
@@ -108,14 +108,14 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/paddle.c:1491
+#: src/paddle.c:1500
 #, c-format
 msgid ""
 "Error: Can't initialize the SDL TTF library\n"
 "%s\n"
 msgstr ""
 
-#: src/paddle.c:1505 src/paddle.c:1558
+#: src/paddle.c:1514 src/paddle.c:1567
 #, c-format
 msgid ""
 "Failed to load font file 'CCFaceFront'\n"

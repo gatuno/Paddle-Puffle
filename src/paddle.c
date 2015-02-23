@@ -78,6 +78,8 @@ enum {
 	IMG_PADDLE_3,
 	IMG_PADDLE_4,
 	
+	IMG_POP,
+	
 	IMG_BLUE_NORMAL_1,
 	IMG_BLUE_FALL_1,
 	IMG_BLUE_FALL_2,
@@ -202,6 +204,8 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/paddle-2.png",
 	GAMEDATA_DIR "images/paddle-3.png",
 	GAMEDATA_DIR "images/paddle-4.png",
+	
+	GAMEDATA_DIR "images/pop.png",
 	
 	GAMEDATA_DIR "images/puffle-blue-1.png",
 	GAMEDATA_DIR "images/puffle-blue-2.png",
@@ -696,10 +700,16 @@ int game_intro (void) {
 					}
 					break;
 				case SDL_KEYDOWN:
-				if (event.key.keysym.sym == SDLK_ESCAPE) {
-					done = GAME_QUIT;
-				}
-				break;
+					/* Tengo una tecla presionada */
+					key = event.key.keysym.sym;
+					
+					if (key == SDLK_F11 || (key == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT))) {
+						SDL_WM_ToggleFullScreen (screen);
+					}
+					if (key == SDLK_ESCAPE) {
+						done = GAME_QUIT;
+					}
+					break;
 			}
 		}
 		
@@ -950,6 +960,17 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 						last_button = BUTTON_NONE;
 					}
 					break;
+				case SDL_KEYDOWN:
+					/* Tengo una tecla presionada */
+					key = event.key.keysym.sym;
+					
+					if (key == SDLK_F11 || (key == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT))) {
+						SDL_WM_ToggleFullScreen (screen);
+					}
+					if (key == SDLK_ESCAPE) {
+						done = GAME_QUIT;
+					}
+					break;
 			}
 		}
 		
@@ -995,7 +1016,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 	SDL_Event event;
 	SDLKey key;
 	Uint32 last_time, now_time;
-	SDL_Rect puf_pos;
+	SDL_Rect puf_pos, rect;
 	int sonido;
 	int last_button = 0, button_frame, button_pressed;
 	
@@ -1012,6 +1033,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 	Puffle *thispuffle;
 	SDL_Surface *text_num;
 	char text_buffer[6];
+	int pop_timer = -1, pop_x, pop_y, pop_num;
 	
 	nuevo_puffle ();
 	background_frame = 0;
@@ -1072,7 +1094,12 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 						fprintf (stderr, "Bounces = 0, desactivando wind\n");
 						bounces = 0;
 					}*/
-					/* TODO: Toggle Fullscreen */
+					if (key == SDLK_F11 || (key == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT))) {
+						SDL_WM_ToggleFullScreen (screen);
+					}
+					if (key == SDLK_ESCAPE) {
+						done = GAME_QUIT;
+					}
 					break;
 			}
 		}
@@ -1204,6 +1231,19 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 				wind_countdown = 240;
 			}		
 			
+			if (pop_timer != -1) {
+				/* Borrar el pop */
+				puf_pos.x = pop_x - 57;
+				puf_pos.y = pop_y + 7;
+				puf_pos.w = 114; puf_pos.h = 86;
+				SDL_BlitSurface (images [background_outputs[background_frame]], &puf_pos, screen, &puf_pos);
+				add_rect (&puf_pos);
+				
+				if (pop_timer > 9) {
+					pop_timer = -1;
+				}
+			}
+			
 			if (thispuffle->y > -99 && thispuffle->y_virtual >= 0) {
 				if ((thispuffle->x > handposx - 70 && thispuffle->x < handposx + 70) && ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) || (thispuffle->y > handposy && thispuffle->y < handposy2))) {
 					/* Bounce the puffle */
@@ -1221,8 +1261,10 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					if (speed < 40) speed += 0.2;
 					else if (balance > 2) balance -= 0.2;
 					
-					/* TODO: Role and poptxt */
-					thispuffle->pop_num++;
+					pop_num = ++thispuffle->pop_num;
+					pop_timer = 0;
+					pop_x = thispuffle->x;
+					pop_y = thispuffle->y;
 					
 					if (thispuffle->pop_num > role) role = thispuffle->pop_num;
 					
@@ -1248,8 +1290,10 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					if (speed < 40) speed += 0.2;
 					else if (balance > 2) balance -= 0.2;
 					
-					/* TODO: Role and poptxt */
-					thispuffle->pop_num++;
+					pop_num = ++thispuffle->pop_num;
+					pop_timer = 0;
+					pop_x = thispuffle->x;
+					pop_y = thispuffle->y;
 					
 					if (thispuffle->pop_num > role) role = thispuffle->pop_num;
 					
@@ -1350,6 +1394,43 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			
 			if (thispuffle != NULL) thispuffle = thispuffle->next;
 		} while (thispuffle != NULL);
+		
+		/* Dibujar el pop */
+		if (pop_timer >= 0) {
+			if (pop_timer < 6) {
+				puf_pos.x = pop_x - 57;
+				puf_pos.y = pop_y + 7;
+				rect.w = puf_pos.w = 114;
+				rect.h = puf_pos.h = 86;
+				
+				rect.y = 0;
+				rect.x = pop_timer * rect.w;
+				
+				SDL_BlitSurface (images[IMG_POP], &rect, screen, &puf_pos);
+				add_rect (&puf_pos);
+				
+				sprintf (text_buffer, "%d", pop_num);
+				text_num = draw_text_with_shadow (ttf16_normal, ttf16_outline, text_buffer);
+				puf_pos.x = pop_x - (text_num->w / 2);
+				puf_pos.y = pop_y + 40;
+				puf_pos.w = text_num->w; puf_pos.h = text_num->h;
+				
+				SDL_BlitSurface (text_num, NULL, screen, &puf_pos);
+				SDL_FreeSurface (text_num);
+			} else {
+				sprintf (text_buffer, "%d", pop_num);
+				text_num = draw_text_with_shadow (ttf16_normal, ttf16_outline, text_buffer);
+				puf_pos.x = pop_x - (text_num->w / 2);
+				puf_pos.y = pop_y + 40;
+				puf_pos.w = text_num->w; puf_pos.h = text_num->h;
+				
+				SDL_BlitSurface (text_num, NULL, screen, &puf_pos);
+				SDL_FreeSurface (text_num);
+				add_rect (&puf_pos);
+			}
+			
+			pop_timer++;
+		}
 		
 		if (whole_flip) {
 			whole_flip = 0;

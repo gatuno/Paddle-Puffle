@@ -1,4 +1,4 @@
-AC_INIT([Paddle Puffle], [0.9.2], [], [paddle-puffle])
+AC_INIT([Paddle Puffle], [0.9.8], [], [paddle-puffle])
 
 AC_REVISION([Revision 9])
 
@@ -38,7 +38,7 @@ PKG_CHECK_EXISTS([SDL_image >= $SDL_IMAGE_VERSION], [AC_MSG_RESULT([yes])], [AC_
 PKG_CHECK_MODULES(SDL_image, [SDL_image >= $SDL_IMAGE_VERSION], [], [])
 
 AC_MSG_CHECKING([if you have SDL_ttf installed on your system])
-PKG_CHECK_EXISTS([SDL_image >= $SDL_IMAGE_VERSION], [AC_MSG_RESULT([yes])], [AC_MSG_FAILURE([SDL_ttf not found in your system])])
+PKG_CHECK_EXISTS([SDL_ttf >= $SDL_TTF_VERSION], [AC_MSG_RESULT([yes])], [AC_MSG_FAILURE([SDL_ttf not found in your system])])
 PKG_CHECK_MODULES(SDL_ttf, [SDL_ttf >= $SDL_TTF_VERSION], [], [])
 
 AC_MSG_CHECKING([if you have SDL_mixer installed on your system])

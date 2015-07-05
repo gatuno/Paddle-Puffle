@@ -491,8 +491,8 @@ int button_refresh [NUM_BUTTONS] = {
 typedef struct _Puffle {
 	struct _Puffle *next;
 	struct _Puffle *prev;
-	int x;
-	int y;
+	float x;
+	float y;
 	float x_virtual;
 	float y_virtual;
 	int pop_num;
@@ -1028,7 +1028,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 	int n_puffles = 1, most_puffles = 1, dropped_puffles = 0; /* Llevar la cantidad de puffles */
 	int count = 0, goal = 20, default_goal = 20; /* Para control de la generación de próximos puffles */
 	int bounces = 0, role = 0; /* Bounces, golpes totales. Role, el mayor número de golpes */
-	int paddle_x, paddle_y, paddle_frame = 0;
+	int paddle_frame = 0;
 	int tickets = 0;
 	Puffle *thispuffle;
 	SDL_Surface *text_num;
@@ -1040,8 +1040,8 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_GetMouseState (&handposx, &handposy);
 	
-	paddle_x = handposx2 = handposx1 = handposx;
-	paddle_y = handposy2 = handposy1 = handposy;
+	handposx2 = handposx1 = handposx;
+	handposy2 = handposy1 = handposy;
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -1196,8 +1196,8 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		thispuffle = first_puffle;
 		do {
 			/* Borrar los puffles */
-			puf_pos.x = thispuffle->x - 48; /* Constante temporal */
-			puf_pos.y = thispuffle->y - 60; /* Constante temporal */
+			puf_pos.x = ((int) thispuffle->x) - 48; /* Constante temporal */
+			puf_pos.y = ((int) thispuffle->y) - 60; /* Constante temporal */
 			puf_pos.w = images [IMG_BLUE_NORMAL_1]->w;
 			puf_pos.h = images [IMG_BLUE_NORMAL_1]->h;
 			SDL_BlitSurface (images [background_outputs[background_frame]], &puf_pos, screen, &puf_pos);
@@ -1211,7 +1211,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			else if (thispuffle->x <= 40 && thispuffle->x_virtual < 0) thispuffle->x_virtual *= -1;
 			
 			if (thispuffle->y_virtual < -10) thispuffle->y_virtual *= 0.9;
-			else thispuffle->y_virtual += 1; /* 1 de "Gravity" */
+			else thispuffle->y_virtual += 1.0; /* 1 de "Gravity" */
 			
 			if (thispuffle->x_virtual > 30 || thispuffle->x_virtual < -30) {
 				thispuffle->x_virtual *= 0.95;
@@ -1229,7 +1229,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 				if (wind) wind = 0;
 				else wind = 1;
 				wind_countdown = 240;
-			}		
+			}
 			
 			if (pop_timer != -1) {
 				/* Borrar el pop */
@@ -1245,7 +1245,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 			}
 			
 			if (thispuffle->y > -99 && thispuffle->y_virtual >= 0) {
-				if ((thispuffle->x > handposx - 70 && thispuffle->x < handposx + 70) && ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) || (thispuffle->y > handposy && thispuffle->y < handposy2))) {
+				if ((((int) thispuffle->x) > handposx - 70 && ((int) thispuffle->x) < handposx + 70) && ((((int) thispuffle->y) + 30 > handposy && ((int) thispuffle->y) + 30 < handposy + 100) || (((int) thispuffle->y) > handposy && ((int) thispuffle->y) < handposy2))) {
 					/* Bounce the puffle */
 					sonido = SND_SQUEAK1 + (int) (2.0 * rand () / (RAND_MAX + 1.0));
 					
@@ -1263,8 +1263,8 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					
 					pop_num = ++thispuffle->pop_num;
 					pop_timer = 0;
-					pop_x = thispuffle->x;
-					pop_y = thispuffle->y;
+					pop_x = ((int) thispuffle->x);
+					pop_y = ((int) thispuffle->y);
 					
 					if (thispuffle->pop_num > role) role = thispuffle->pop_num;
 					
@@ -1274,7 +1274,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 					if (use_sound) Mix_PlayChannel (-1, sounds[sonido], 0);
 					
 					tickets = bounces + most_puffles * role;
-				} else if ((thispuffle->y + 30 > handposy && thispuffle->y + 30 < handposy + 100) && ((thispuffle->x > handposx && thispuffle->x < handposx2) || (thispuffle->x < handposx && thispuffle->x > handposx2))) {
+				} else if ((((int) thispuffle->y) + 30 > handposy && ((int) thispuffle->y) + 30 < handposy + 100) && ((((int) thispuffle->x) > handposx && ((int) thispuffle->x) < handposx2) || (((int) thispuffle->x) < handposx && ((int) thispuffle->x) > handposx2))) {
 					/* Bounce the puffle */
 					sonido = SND_SQUEAK1 + (int) (2.0 * rand () / (RAND_MAX + 1.0));
 					
@@ -1322,7 +1322,7 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		add_rect (&puf_pos);
 		
 		/* Preborrar la paleta */
-		puf_pos.x = paddle_x - 58; puf_pos.y = paddle_y - 70;
+		puf_pos.x = handposx1 - 58; puf_pos.y = handposy1 - 70;
 		puf_pos.h = images [IMG_PADDLE_1]->h;
 		puf_pos.w = images [IMG_PADDLE_1]->w;
 		
@@ -1348,14 +1348,11 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		add_rect (&puf_pos);
 		SDL_FreeSurface (text_num);
 		
-		paddle_x = handposx;
-		paddle_y = handposy;
-		
 		paddle_frame = paddle_frames[paddle_frame][PADDLE_NORMAL];
 		
 		/* Blit el paddle */
-		puf_pos.x = paddle_x - 58; /* Constante temporal */
-		puf_pos.y = paddle_y - 70; /* Constante temporal */
+		puf_pos.x = handposx - 58; /* Constante temporal */
+		puf_pos.y = handposy - 70; /* Constante temporal */
 		puf_pos.h = images [IMG_PADDLE_1]->h;
 		puf_pos.w = images [IMG_PADDLE_1]->w;
 		
@@ -1384,8 +1381,8 @@ int game_loop (int *ret_bounces, int *ret_role, int *ret_most, int *ret_tickets)
 		do {
 			if (thispuffle->y > -100) {
 				/* Blit this puffle */
-				puf_pos.x = thispuffle->x - 48; /* Constante temporal */
-				puf_pos.y = thispuffle->y - 60; /* Constante temporal */
+				puf_pos.x = ((int) thispuffle->x) - 48; /* Constante temporal */
+				puf_pos.y = ((int) thispuffle->y) - 60; /* Constante temporal */
 				puf_pos.w = images [puffle_outputs [thispuffle->frame]]->w;
 				puf_pos.h = images [puffle_outputs [thispuffle->frame]]->h;
 				SDL_BlitSurface (images [puffle_outputs [thispuffle->frame] + (thispuffle->color * 8)], NULL, screen, &puf_pos);

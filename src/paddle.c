@@ -40,13 +40,17 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include <locale.h>
 #include "gettext.h"
 #define _(string) gettext (string)
 
 #include "draw-text.h"
+
+#include "path.h"
 
 #define FPS (1000/24)
 #define MAX_RECTS 256
@@ -180,122 +184,122 @@ enum {
 
 /* Los nombres de archivos */
 const char *images_names[NUM_IMAGES] = {
-	GAMEDATA_DIR "images/title.png",
+	"images/title.png",
 	
-	GAMEDATA_DIR "images/title-opening.png",
+	"images/title-opening.png",
 	
-	GAMEDATA_DIR "images/note.png",
+	"images/note.png",
 	
-	GAMEDATA_DIR "images/normal.png",
-	GAMEDATA_DIR "images/new-0.png",
-	GAMEDATA_DIR "images/new-1.png",
-	GAMEDATA_DIR "images/fail-0.png",
-	GAMEDATA_DIR "images/fail-1.png",
+	"images/normal.png",
+	"images/new-0.png",
+	"images/new-1.png",
+	"images/fail-0.png",
+	"images/fail-1.png",
 	
-	GAMEDATA_DIR "images/boton-close-up.png",
-	GAMEDATA_DIR "images/boton-close-over.png",
-	GAMEDATA_DIR "images/boton-close-down.png",
+	"images/boton-close-up.png",
+	"images/boton-close-over.png",
+	"images/boton-close-down.png",
 	
-	GAMEDATA_DIR "images/boton-ui-up.png",
-	GAMEDATA_DIR "images/boton-ui-over.png",
-	GAMEDATA_DIR "images/boton-ui-down.png",
+	"images/boton-ui-up.png",
+	"images/boton-ui-over.png",
+	"images/boton-ui-down.png",
 	
-	GAMEDATA_DIR "images/paddle-1.png",
-	GAMEDATA_DIR "images/paddle-2.png",
-	GAMEDATA_DIR "images/paddle-3.png",
-	GAMEDATA_DIR "images/paddle-4.png",
+	"images/paddle-1.png",
+	"images/paddle-2.png",
+	"images/paddle-3.png",
+	"images/paddle-4.png",
 	
-	GAMEDATA_DIR "images/pop.png",
+	"images/pop.png",
 	
-	GAMEDATA_DIR "images/puffle-blue-1.png",
-	GAMEDATA_DIR "images/puffle-blue-2.png",
-	GAMEDATA_DIR "images/puffle-blue-3.png",
-	GAMEDATA_DIR "images/puffle-blue-4.png",
-	GAMEDATA_DIR "images/puffle-blue-5.png",
-	GAMEDATA_DIR "images/puffle-blue-6.png",
-	GAMEDATA_DIR "images/puffle-blue-7.png",
-	GAMEDATA_DIR "images/puffle-blue-8.png",
+	"images/puffle-blue-1.png",
+	"images/puffle-blue-2.png",
+	"images/puffle-blue-3.png",
+	"images/puffle-blue-4.png",
+	"images/puffle-blue-5.png",
+	"images/puffle-blue-6.png",
+	"images/puffle-blue-7.png",
+	"images/puffle-blue-8.png",
 	
-	GAMEDATA_DIR "images/puffle-pink-1.png",
-	GAMEDATA_DIR "images/puffle-pink-2.png",
-	GAMEDATA_DIR "images/puffle-pink-3.png",
-	GAMEDATA_DIR "images/puffle-pink-4.png",
-	GAMEDATA_DIR "images/puffle-pink-5.png",
-	GAMEDATA_DIR "images/puffle-pink-6.png",
-	GAMEDATA_DIR "images/puffle-pink-7.png",
-	GAMEDATA_DIR "images/puffle-pink-8.png",
+	"images/puffle-pink-1.png",
+	"images/puffle-pink-2.png",
+	"images/puffle-pink-3.png",
+	"images/puffle-pink-4.png",
+	"images/puffle-pink-5.png",
+	"images/puffle-pink-6.png",
+	"images/puffle-pink-7.png",
+	"images/puffle-pink-8.png",
 	
-	GAMEDATA_DIR "images/puffle-black-1.png",
-	GAMEDATA_DIR "images/puffle-black-2.png",
-	GAMEDATA_DIR "images/puffle-black-3.png",
-	GAMEDATA_DIR "images/puffle-black-4.png",
-	GAMEDATA_DIR "images/puffle-black-5.png",
-	GAMEDATA_DIR "images/puffle-black-6.png",
-	GAMEDATA_DIR "images/puffle-black-7.png",
-	GAMEDATA_DIR "images/puffle-black-8.png",
+	"images/puffle-black-1.png",
+	"images/puffle-black-2.png",
+	"images/puffle-black-3.png",
+	"images/puffle-black-4.png",
+	"images/puffle-black-5.png",
+	"images/puffle-black-6.png",
+	"images/puffle-black-7.png",
+	"images/puffle-black-8.png",
 	
-	GAMEDATA_DIR "images/puffle-green-1.png",
-	GAMEDATA_DIR "images/puffle-green-2.png",
-	GAMEDATA_DIR "images/puffle-green-3.png",
-	GAMEDATA_DIR "images/puffle-green-4.png",
-	GAMEDATA_DIR "images/puffle-green-5.png",
-	GAMEDATA_DIR "images/puffle-green-6.png",
-	GAMEDATA_DIR "images/puffle-green-7.png",
-	GAMEDATA_DIR "images/puffle-green-8.png",
+	"images/puffle-green-1.png",
+	"images/puffle-green-2.png",
+	"images/puffle-green-3.png",
+	"images/puffle-green-4.png",
+	"images/puffle-green-5.png",
+	"images/puffle-green-6.png",
+	"images/puffle-green-7.png",
+	"images/puffle-green-8.png",
 	
-	GAMEDATA_DIR "images/puffle-purple-1.png",
-	GAMEDATA_DIR "images/puffle-purple-2.png",
-	GAMEDATA_DIR "images/puffle-purple-3.png",
-	GAMEDATA_DIR "images/puffle-purple-4.png",
-	GAMEDATA_DIR "images/puffle-purple-5.png",
-	GAMEDATA_DIR "images/puffle-purple-6.png",
-	GAMEDATA_DIR "images/puffle-purple-7.png",
-	GAMEDATA_DIR "images/puffle-purple-8.png",
+	"images/puffle-purple-1.png",
+	"images/puffle-purple-2.png",
+	"images/puffle-purple-3.png",
+	"images/puffle-purple-4.png",
+	"images/puffle-purple-5.png",
+	"images/puffle-purple-6.png",
+	"images/puffle-purple-7.png",
+	"images/puffle-purple-8.png",
 	
-	GAMEDATA_DIR "images/puffle-red-1.png",
-	GAMEDATA_DIR "images/puffle-red-2.png",
-	GAMEDATA_DIR "images/puffle-red-3.png",
-	GAMEDATA_DIR "images/puffle-red-4.png",
-	GAMEDATA_DIR "images/puffle-red-5.png",
-	GAMEDATA_DIR "images/puffle-red-6.png",
-	GAMEDATA_DIR "images/puffle-red-7.png",
-	GAMEDATA_DIR "images/puffle-red-8.png",
+	"images/puffle-red-1.png",
+	"images/puffle-red-2.png",
+	"images/puffle-red-3.png",
+	"images/puffle-red-4.png",
+	"images/puffle-red-5.png",
+	"images/puffle-red-6.png",
+	"images/puffle-red-7.png",
+	"images/puffle-red-8.png",
 	
-	GAMEDATA_DIR "images/puffle-yellow-1.png",
-	GAMEDATA_DIR "images/puffle-yellow-2.png",
-	GAMEDATA_DIR "images/puffle-yellow-3.png",
-	GAMEDATA_DIR "images/puffle-yellow-4.png",
-	GAMEDATA_DIR "images/puffle-yellow-5.png",
-	GAMEDATA_DIR "images/puffle-yellow-6.png",
-	GAMEDATA_DIR "images/puffle-yellow-7.png",
-	GAMEDATA_DIR "images/puffle-yellow-8.png",
+	"images/puffle-yellow-1.png",
+	"images/puffle-yellow-2.png",
+	"images/puffle-yellow-3.png",
+	"images/puffle-yellow-4.png",
+	"images/puffle-yellow-5.png",
+	"images/puffle-yellow-6.png",
+	"images/puffle-yellow-7.png",
+	"images/puffle-yellow-8.png",
 	
-	GAMEDATA_DIR "images/puffle-white-1.png",
-	GAMEDATA_DIR "images/puffle-white-2.png",
-	GAMEDATA_DIR "images/puffle-white-3.png",
-	GAMEDATA_DIR "images/puffle-white-4.png",
-	GAMEDATA_DIR "images/puffle-white-5.png",
-	GAMEDATA_DIR "images/puffle-white-6.png",
-	GAMEDATA_DIR "images/puffle-white-7.png",
-	GAMEDATA_DIR "images/puffle-white-8.png",
+	"images/puffle-white-1.png",
+	"images/puffle-white-2.png",
+	"images/puffle-white-3.png",
+	"images/puffle-white-4.png",
+	"images/puffle-white-5.png",
+	"images/puffle-white-6.png",
+	"images/puffle-white-7.png",
+	"images/puffle-white-8.png",
 	
-	GAMEDATA_DIR "images/puffle-orange-1.png",
-	GAMEDATA_DIR "images/puffle-orange-2.png",
-	GAMEDATA_DIR "images/puffle-orange-3.png",
-	GAMEDATA_DIR "images/puffle-orange-4.png",
-	GAMEDATA_DIR "images/puffle-orange-5.png",
-	GAMEDATA_DIR "images/puffle-orange-6.png",
-	GAMEDATA_DIR "images/puffle-orange-7.png",
-	GAMEDATA_DIR "images/puffle-orange-8.png",
+	"images/puffle-orange-1.png",
+	"images/puffle-orange-2.png",
+	"images/puffle-orange-3.png",
+	"images/puffle-orange-4.png",
+	"images/puffle-orange-5.png",
+	"images/puffle-orange-6.png",
+	"images/puffle-orange-7.png",
+	"images/puffle-orange-8.png",
 	
-	GAMEDATA_DIR "images/puffle-brown-1.png",
-	GAMEDATA_DIR "images/puffle-brown-2.png",
-	GAMEDATA_DIR "images/puffle-brown-3.png",
-	GAMEDATA_DIR "images/puffle-brown-4.png",
-	GAMEDATA_DIR "images/puffle-brown-5.png",
-	GAMEDATA_DIR "images/puffle-brown-6.png",
-	GAMEDATA_DIR "images/puffle-brown-7.png",
-	GAMEDATA_DIR "images/puffle-brown-8.png"
+	"images/puffle-brown-1.png",
+	"images/puffle-brown-2.png",
+	"images/puffle-brown-3.png",
+	"images/puffle-brown-4.png",
+	"images/puffle-brown-5.png",
+	"images/puffle-brown-6.png",
+	"images/puffle-brown-7.png",
+	"images/puffle-brown-8.png"
 };
 
 enum {
@@ -309,15 +313,15 @@ enum {
 };
 
 const char *sound_names[NUM_SOUNDS] = {
-	GAMEDATA_DIR "sounds/squeak1.wav",
-	GAMEDATA_DIR "sounds/squeak2.wav",
-	GAMEDATA_DIR "sounds/squeak3.wav",
-	GAMEDATA_DIR "sounds/oldboing.wav",
-	GAMEDATA_DIR "sounds/overtodown1.wav",
-	GAMEDATA_DIR "sounds/overtodown2.wav",
+	"sounds/squeak1.wav",
+	"sounds/squeak2.wav",
+	"sounds/squeak3.wav",
+	"sounds/oldboing.wav",
+	"sounds/overtodown1.wav",
+	"sounds/overtodown2.wav",
 };
 
-#define MUS_CARNIE GAMEDATA_DIR "music/carnie.ogg"
+#define MUS_CARNIE "music/carnie.ogg"
 
 /* Entrada 0 significa normal, 1 nuevo, 2 perdido */
 enum {
@@ -508,9 +512,9 @@ void setup (void);
 SDL_Surface * set_video_mode(unsigned flags);
 void nuevo_puffle (void);
 void eliminar_puffle (Puffle *p);
-int map_button_in_game (int x, int y);
-int map_button_in_opening (int x, int y);
-int map_button_in_finish (int x, int y);
+inline int map_button_in_game (int x, int y);
+inline int map_button_in_opening (int x, int y);
+inline int map_button_in_finish (int x, int y);
 void add_rect(SDL_Rect *rect);
 
 /* Variables globales */
@@ -537,10 +541,11 @@ TTF_Font *ttf14_normal, *ttf26_normal;
 int main (int argc, char *argv[]) {
 	int bounces, role, most, tickets;
 	
+	initSystemPaths (argv[0]);
 	/* Inicializar l18n */
 	
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
+	bindtextdomain (PACKAGE, l10n_path);
 	
 	textdomain (PACKAGE);
 	
@@ -1461,7 +1466,7 @@ void setup (void) {
 	SDL_Color color;
 	SDL_Rect rect, rect2;
 	int g;
-	
+	char buffer_file[8192];
 	
 	/* Estas cadenas son traducibles */
 	const char * text_strings[NUM_TEXTS] = {
@@ -1482,8 +1487,8 @@ void setup (void) {
 			"%s\n"), SDL_GetError());
 		exit (1);
 	}
-	
-	image = IMG_Load (GAMEDATA_DIR "images/icon.png");
+	sprintf (buffer_file, "%simages/icon.png", systemdata_path);
+	image = IMG_Load (buffer_file);
 	if (image) {
 		SDL_WM_SetIcon (image, NULL);
 		SDL_FreeSurface (image);
@@ -1519,14 +1524,15 @@ void setup (void) {
 	}
 	
 	for (g = 0; g < NUM_IMAGES; g++) {
-		image = IMG_Load (images_names[g]);
+		sprintf (buffer_file, "%s%s", systemdata_path, images_names[g]);
+		image = IMG_Load (buffer_file);
 		
 		if (image == NULL) {
 			fprintf (stderr,
 				_("Failed to load data file:\n"
 				"%s\n"
 				"The error returned by SDL is:\n"
-				"%s\n"), images_names[g], SDL_GetError());
+				"%s\n"), buffer_file, SDL_GetError());
 			SDL_Quit ();
 			exit (1);
 		}
@@ -1543,14 +1549,15 @@ void setup (void) {
 	
 	if (use_sound) {
 		for (g = 0; g < NUM_SOUNDS; g++) {
-			sounds[g] = Mix_LoadWAV (sound_names [g]);
+			sprintf (buffer_file, "%s%s", systemdata_path, sound_names[g]);
+			sounds[g] = Mix_LoadWAV (buffer_file);
 			
 			if (sounds[g] == NULL) {
 				fprintf (stderr,
 					_("Failed to load data file:\n"
 					"%s\n"
 					"The error returned by SDL is:\n"
-					"%s\n"), sound_names [g], SDL_GetError ());
+					"%s\n"), buffer_file, SDL_GetError ());
 				SDL_Quit ();
 				exit (1);
 			}
@@ -1558,15 +1565,15 @@ void setup (void) {
 		}
 		
 		/* Cargar la música */
-		
-		mus_carnie = Mix_LoadMUS (MUS_CARNIE);
+		sprintf (buffer_file, "%s%s", systemdata_path, MUS_CARNIE);
+		mus_carnie = Mix_LoadMUS (buffer_file);
 		
 		if (mus_carnie == NULL) {
 			fprintf (stderr,
 				_("Failed to load data file:\n"
 				"%s\n"
 				"The error returned by SDL is:\n"
-				"%s\n"), MUS_CARNIE, SDL_GetError ());
+				"%s\n"), buffer_file, SDL_GetError ());
 			SDL_Quit ();
 			exit (1);
 		}
@@ -1582,10 +1589,11 @@ void setup (void) {
 	}
 	
 	/* Tipografias 10, 14, 16, 26 */
-	ttf10 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 10);
-	ttf14 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 14);
-	ttf16 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
-	ttf26 = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 26);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	ttf10 = TTF_OpenFont (buffer_file, 10);
+	ttf14 = TTF_OpenFont (buffer_file, 14);
+	ttf16 = TTF_OpenFont (buffer_file, 16);
+	ttf26 = TTF_OpenFont (buffer_file, 26);
 	
 	if (!ttf10 || !ttf14 || !ttf16 || !ttf26) {
 		fprintf (stderr,
@@ -1636,9 +1644,9 @@ void setup (void) {
 	ttf16_normal = ttf16;
 	ttf14_normal = ttf14;
 	ttf26_normal = ttf26;
-	ttf20_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
-	ttf20_outline = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
-	ttf16_outline = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
+	ttf20_normal = TTF_OpenFont (buffer_file, 20);
+	ttf20_outline = TTF_OpenFont (buffer_file, 20);
+	ttf16_outline = TTF_OpenFont (buffer_file, 16);
 	
 	if (!ttf20_normal || !ttf20_outline || !ttf16_outline) {
 		fprintf (stderr,

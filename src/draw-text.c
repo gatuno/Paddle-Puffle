@@ -43,7 +43,6 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 	SDL_Rect dest_rect;
 	int n_tokens;
 	int g, len, maxw;
-	Uint32 pixel;
 	char *dup, *str_token, *original;
 	
 	/* Si contiene saltos de linea, llamar a la otra función */

@@ -200,6 +200,21 @@ void initSystemPaths (const char *argv_0) {
 #endif
 	
 	progCallPath = strdup (argv_0);
+#if MACOSX
+	CFBundleRef mainBundle = CFBundleGetMainBundle();
+	CFURLRef cfurlmain = CFBundleCopyExecutableURL(mainBundle);
+	CFStringRef cffileStr = CFURLCopyFileSystemPath(cfurlmain, kCFURLPOSIXPathStyle);
+	CFIndex cfmax = CFStringGetMaximumSizeOfFileSystemRepresentation(cffileStr);
+	char *localbuffer;
+	localbuffer = (char *) malloc (sizeof (char) * cfmax);
+	if (CFStringGetFileSystemRepresentation(cffileStr, localbuffer, cfmax)) {
+    	free (progCallPath);
+		progCallPath = localbuffer; // error skips this and defaults to argv[0] which works for most purposes
+	}
+	CFRelease(mainBundle);
+	CFRelease(cfurlmain);
+	CFRelease(cffileStr);
+#endif
 	progdir = strdup (progCallPath);
 	progdirexists = split_path (progCallPath, progdir, NULL);
 
@@ -212,19 +227,6 @@ void initSystemPaths (const char *argv_0) {
 		sprintf (systemdata_path, "%s/data/", progdir);
 	}
 #elif MACOSX
-	CFBundleRef mainBundle = CFBundleGetMainBundle();
-	CFURLRef cfurlmain = CFBundleCopyExecutableURL(mainBundle);
-	CFStringRef cffileStr = CFURLCopyFileSystemPath(cfurlmain, kCFURLPOSIXPathStyle);
-	CFIndex cfmax = CFStringGetMaximumSizeOfFileSystemRepresentation(cffileStr);
-	char *localbuffer;
-	localbuffer = (char *) malloc (sizeof (char) * cfmax);
-	if (CFStringGetFileSystemRepresentation(cffileStr, localbuffer, cfmax)) {
-    	free (progCallPath);
-		progCallPath = localbuffer; // error skips this and defaults to argv[0] which works for most purposes
-	}
-	CFRelease(cfurlmain);
-	CFRelease(cffileStr);
-	
     // Mac OS X applications are self-contained bundles,
     // i.e., directories like "Enigma.app".  Resources are
     // placed in those bundles under "Enigma.app/Contents/Resources",

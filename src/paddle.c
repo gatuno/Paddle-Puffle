@@ -177,11 +177,6 @@ enum {
 	NUM_IMAGES
 };
 
-#ifdef __MINGW32__
-#	undef GAMEDATA_DIR
-#	define GAMEDATA_DIR "./"
-#endif
-
 /* Los nombres de archivos */
 const char *images_names[NUM_IMAGES] = {
 	"images/title.png",

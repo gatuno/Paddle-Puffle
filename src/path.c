@@ -39,6 +39,8 @@
 #include <shellapi.h>
 #endif
 
+#include "path.h"
+
 char *systemdata_path;
 char *l10n_path;
 char *userdata_path;
@@ -62,17 +64,17 @@ char *userdata_path;
 #	define MAX_PATH 2048
 #endif
 
-static int folder_exists (const char *fname) {
+int folder_exists (const char *fname) {
 	struct stat s;
 	return (stat(fname, &s) == 0 && S_ISDIR(s.st_mode));
 }
 
-static int file_exists (const char *fname) {
+int file_exists (const char *fname) {
 	struct stat s;
 	return (stat(fname, &s) == 0 && S_ISREG(s.st_mode));
 }
 
-int split_path (const char *path, char * dir_part, char * filename_part) {
+static int split_path (const char *path, char * dir_part, char * filename_part) {
 	int lslash, lnslash;
 	int g;
 	char *dup;
@@ -148,7 +150,7 @@ int folder_create (const char *fname) {
 		#ifdef __MINGW32__
 		ok = mkdir(fname) == 0;
 		#else
-		ok = mkdir(fname, 0777) == 0;
+		ok = mkdir(fname, 0775) == 0;
 		#endif
 	}
 	
@@ -159,7 +161,7 @@ int folder_create (const char *fname) {
 
 #ifdef __MINGW32__
 // should be ecl_system_windows.cc ?
-void ApplicationDataPath (char * buffer) {
+static void ApplicationDataPath (char * buffer) {
 	typedef HRESULT (WINAPI *SHGETFOLDERPATH)( HWND, int, HANDLE, DWORD, LPTSTR );
 	#   define CSIDL_FLAG_CREATE 0x8000
 	#   define CSIDL_APPDATA 0x1A
@@ -238,7 +240,7 @@ void initSystemPaths (const char *argv_0) {
 	systemdata_path = (char *) malloc (sizeof (char) * (strlen (progdir) + 30));
 	sprintf (systemdata_path, "%s/../Resources/data/", progdir);
 #else
-	/* Para Windows, Linux */
+	/* Para Linux */
 	systemdata_path = GAMEDATA_DIR;
 #endif
 	

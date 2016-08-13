@@ -26,6 +26,9 @@ extern char *l10n_path;
 extern char *userdata_path;
 
 void initSystemPaths (const char *argv_0);
+int folder_exists (const char *fname);
+int file_exists (const char *fname);
+int folder_create (const char *fname);
 
 #endif /* __PATH_H__ */
 

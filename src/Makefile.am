@@ -9,7 +9,11 @@ if MINGW32
 paddle_puffle_SOURCES += strsep.c
 endif
 
-EXTRA_DIST = paddle.rc
+if MACOSX
+paddle_puffle_SOURCES += SDLMain.m SDLMain.h
+endif
+
+EXTRA_DIST = paddle.rc SDLMain.m SDLMain.h
 
 if MINGW32
 paddle_ico.o: paddle.rc ../data/paddle.ico
@@ -25,7 +29,7 @@ paddle_puffle_CPPFLAGS = -DGAMEDATA_DIR=\"$(gamedatadir)/\" -DLOCALEDIR=\"$(loca
 paddle_puffle_CFLAGS = $(SDL_CFLAGS) $(SDL_image_CFLAGS) $(SDL_mixer_CFLAGS) $(SDL_ttf_CFLAGS) $(AM_CFLAGS)
 if MACOSX
 # En MAC OS X, hay que ligar/compilar contra los frameworks
-paddle_puffle_LDADD = $(SDL_LIBS)
+paddle_puffle_LDFLAGS = -Wl,-rpath,@loader_path/../Frameworks
 else
 paddle_puffle_LDADD = $(SDL_LIBS) $(SDL_image_LIBS) $(SDL_mixer_LIBS) $(SDL_ttf_LIBS) $(mingw_ldadd)
 endif

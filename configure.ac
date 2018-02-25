@@ -17,10 +17,10 @@ AC_PROG_OBJC
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # Translate this program
-AM_GNU_GETTEXT_VERSION([0.18.1])
+AM_GNU_GETTEXT_VERSION([0.19.3])
 AM_GNU_GETTEXT([external])
 
-ALL_LINGUAS="de es"
+ALL_LINGUAS="de es fr"
 AC_SUBST(ALL_LINGUAS)
 
 AM_PROG_CC_C_O

@@ -540,7 +540,7 @@ int main (int argc, char *argv[]) {
 	/* Inicializar l18n */
 	
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, l10n_path);
+	bindtextdomain (PACKAGE, get_l10n_path ());
 	
 	textdomain (PACKAGE);
 	
@@ -1462,6 +1462,7 @@ void setup (void) {
 	SDL_Rect rect, rect2;
 	int g;
 	char buffer_file[8192];
+	char *systemdata_path = get_systemdata_path ();
 	
 	/* Estas cadenas son traducibles */
 	const char * text_strings[NUM_TEXTS] = {

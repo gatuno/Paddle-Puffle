@@ -1,4 +1,4 @@
-AC_INIT([Paddle Puffle], [1.0.0], [], [paddle-puffle])
+AC_INIT([Paddle Puffle], [1.0.1], [], [paddle-puffle])
 
 AC_REVISION([Revision 10])
 
@@ -80,6 +80,7 @@ if test "x$MACOSX" = xyes; then
 			AC_LIB_APPENDTOVAR([CFLAGS], [-F$cy_framework])
 			AC_LIB_APPENDTOVAR([CXXFLAGS], [-F$cy_framework])
 			AC_LIB_APPENDTOVAR([OBJCCXXFLAGS], [-F$cy_framework])
+			AC_LIB_APPENDTOVAR([LDFLAGS], [-F$cy_framework])
 			for g in $SDL_FRAMEWORKS; do
 				AC_LIB_APPENDTOVAR([CPPFLAGS], [-I$cy_framework/$g.framework/Headers])
 			done

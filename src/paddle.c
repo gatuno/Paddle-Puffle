@@ -1457,12 +1457,13 @@ SDL_Surface * set_video_mode (unsigned flags) {
 
 void setup (void) {
 	SDL_Surface * image;
-	TTF_Font *ttf10, *ttf14, *ttf16, *ttf26, *temp_font;
+	TTF_Font *temp1, *temp2;
 	SDL_Color color;
 	SDL_Rect rect, rect2;
 	int g;
 	char buffer_file[8192];
 	char *systemdata_path = get_systemdata_path ();
+	SDL_RWops *ttf_facefront;
 	
 	/* Estas cadenas son traducibles */
 	const char * text_strings[NUM_TEXTS] = {
@@ -1586,12 +1587,9 @@ void setup (void) {
 	
 	/* Tipografias 10, 14, 16, 26 */
 	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	ttf10 = TTF_OpenFont (buffer_file, 10);
-	ttf14 = TTF_OpenFont (buffer_file, 14);
-	ttf16 = TTF_OpenFont (buffer_file, 16);
-	ttf26 = TTF_OpenFont (buffer_file, 26);
+	ttf_facefront = SDL_RWFromFile (buffer_file, "rb");
 	
-	if (!ttf10 || !ttf14 || !ttf16 || !ttf26) {
+	if (ttf_facefront == NULL) {
 		fprintf (stderr,
 			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
@@ -1600,26 +1598,58 @@ void setup (void) {
 		exit (1);
 	}
 	
-	TTF_SetFontStyle (ttf10, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf14, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf16, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf26, TTF_STYLE_ITALIC);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	temp1 = TTF_OpenFontRW (ttf_facefront, 0, 10);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf14_normal = TTF_OpenFontRW (ttf_facefront, 0, 14);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf16_normal = TTF_OpenFontRW (ttf_facefront, 0, 16);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf26_normal = TTF_OpenFontRW (ttf_facefront, 0, 26);
 	
+	if (!temp1 || !ttf14_normal || !ttf16_normal || !ttf26_normal) {
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf20_normal = TTF_OpenFontRW (ttf_facefront, 0, 20);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf20_outline = TTF_OpenFontRW (ttf_facefront, 0, 20);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf16_outline = TTF_OpenFontRW (ttf_facefront, 1, 16);
+	
+	if (!ttf20_normal || !ttf20_outline || !ttf16_outline) {
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (temp1, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf14_normal, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf16_normal, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf26_normal, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf16_outline, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf20_outline, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf20_normal, TTF_STYLE_ITALIC);
+	
+	TTF_SetFontOutline (ttf16_outline, OUTLINE_TEXT);
+	TTF_SetFontOutline (ttf20_outline, OUTLINE_TEXT);
+	
+	/* Generar textos */
+	bind_textdomain_codeset (PACKAGE, "UTF-8");
 	color.r = color.g = color.b = 0; /* Negro */
 	
 	for (g = 0; g < NUM_TEXTS; g++) {
 		switch (text_info [g]) {
-			case 10: temp_font = ttf10; break;
-			case 14: temp_font = ttf14; break;
-			case 16: temp_font = ttf16; break;
-			case 26: temp_font = ttf26; break;
-			default: temp_font = ttf16;
+			case 10: temp2 = temp1; break;
+			case 14: temp2 = ttf14_normal; break;
+			case 16: temp2 = ttf16_normal; break;
+			case 26: temp2 = ttf26_normal; break;
+			default: temp2 = ttf16_normal;
 		}
 		
-		texts[g] = draw_text (temp_font, text_strings[g], &color);
+		texts[g] = draw_text (temp2, text_strings[g], &color);
 	}
-	
-	TTF_CloseFont (ttf10);
 	
 	/* Copiar la palabra "Tickets" en el background */
 	/* También copiar el nombre del juego al titulo y al fondo */
@@ -1636,30 +1666,7 @@ void setup (void) {
 	rect2.x = 84; rect2.y = 51;
 	SDL_BlitSurface (images[IMG_TITLE], NULL, images[IMG_TITLE_OPENING], &rect2);
 	
-	/* Dejar abiertas las otras tipografias */
-	ttf16_normal = ttf16;
-	ttf14_normal = ttf14;
-	ttf26_normal = ttf26;
-	ttf20_normal = TTF_OpenFont (buffer_file, 20);
-	ttf20_outline = TTF_OpenFont (buffer_file, 20);
-	ttf16_outline = TTF_OpenFont (buffer_file, 16);
-	
-	if (!ttf20_normal || !ttf20_outline || !ttf16_outline) {
-		fprintf (stderr,
-			_("Failed to load font file 'CCFaceFront'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
-		SDL_Quit ();
-		exit (1);
-	}
-	
-	TTF_SetFontStyle (ttf16_outline, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf20_outline, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf20_normal, TTF_STYLE_ITALIC);
-	
-	TTF_SetFontOutline (ttf16_outline, OUTLINE_TEXT);
-	TTF_SetFontOutline (ttf20_outline, OUTLINE_TEXT);
-	
+	TTF_CloseFont (temp1);
 	/* Generador de números aleatorios */
 	srand (SDL_GetTicks ());
 }

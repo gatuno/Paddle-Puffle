@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: paddle-puffle 0.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-26 23:43-0600\n"
+"POT-Creation-Date: 2018-02-28 23:35-0600\n"
 "PO-Revision-Date: 2013-03-08 11:50-0600\n"
 "Last-Translator: Flix Arreola Rodrguez <gatuno_123@esdebian.org>\n"
 "Language-Team: Spanish\n"
@@ -25,7 +25,7 @@ msgstr "JUGAR"
 msgid "DONE"
 msgstr "LISTO"
 
-#: src/paddle.c:1469
+#: src/paddle.c:1470
 msgid ""
 "- USE YOUR MOUSE TO BOUNCE THE \n"
 "  PUFFLES AND KEEP THEM IN THE AIR \n"
@@ -49,7 +49,7 @@ msgstr ""
 "- CUANTO MÁS REBOTE UN MISMO PUFFLE, \n"
 "  MÁS PUNTOS GANARÁS"
 
-#: src/paddle.c:1470
+#: src/paddle.c:1471
 msgid ""
 "WARNING! \n"
 "\n"
@@ -61,27 +61,27 @@ msgstr ""
 "ARREGLAME: CAMBIA \n"
 "ESTE TEXTO."
 
-#: src/paddle.c:1471
+#: src/paddle.c:1472
 msgid "TICKETS"
 msgstr "BILLETES"
 
-#: src/paddle.c:1472
+#: src/paddle.c:1473
 msgid "BOUNCE POINTS:"
 msgstr "PUNTOS POR REBOTE:"
 
-#: src/paddle.c:1473
+#: src/paddle.c:1474
 msgid "MOST BOUNCED PUFFLE:"
 msgstr "PUFFLE QUE MÁS HA REBOTADO:"
 
-#: src/paddle.c:1474
+#: src/paddle.c:1475
 msgid "PUFFLES JUGGLED:"
 msgstr "CANTIDAD DE PUFFLES:"
 
-#: src/paddle.c:1475
+#: src/paddle.c:1476
 msgid "TOTAL TICKETS:"
 msgstr "TOTAL:"
 
-#: src/paddle.c:1481
+#: src/paddle.c:1482
 #, c-format
 msgid ""
 "Error: Can't initialize the video subsystem\n"
@@ -92,11 +92,11 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/paddle.c:1492
+#: src/paddle.c:1493
 msgid "Paddle Puffle"
 msgstr "Paddle Puffle"
 
-#: src/paddle.c:1499
+#: src/paddle.c:1500
 #, c-format
 msgid ""
 "Error: Can't setup 760x480 video mode.\n"
@@ -107,7 +107,7 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/paddle.c:1508
+#: src/paddle.c:1509
 #, c-format
 msgid ""
 "Warning: Can't initialize the audio subsystem\n"
@@ -116,12 +116,12 @@ msgstr ""
 "Advertencia: No se pudo inicializar el sistema de audio\n"
 "Continuando...\n"
 
-#: src/paddle.c:1517
+#: src/paddle.c:1518
 #, c-format
 msgid "Warning: Can't initialize the SDL Mixer library\n"
 msgstr "Advertencia: No se pudo inicializar la biblioteca SDL Mixer\n"
 
-#: src/paddle.c:1528 src/paddle.c:1553 src/paddle.c:1569
+#: src/paddle.c:1529 src/paddle.c:1554 src/paddle.c:1570
 #, c-format
 msgid ""
 "Failed to load data file:\n"
@@ -134,7 +134,7 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/paddle.c:1581
+#: src/paddle.c:1582
 #, c-format
 msgid ""
 "Error: Can't initialize the SDL TTF library\n"
@@ -143,7 +143,7 @@ msgstr ""
 "Error: No se pudo inicializar la biblioteca SDL TFF\n"
 "%s\n"
 
-#: src/paddle.c:1596 src/paddle.c:1649
+#: src/paddle.c:1594
 #, c-format
 msgid ""
 "Failed to load font file 'CCFaceFront'\n"

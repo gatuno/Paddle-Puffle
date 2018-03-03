@@ -461,6 +461,16 @@ enum {
 	NUM_TEXTS
 };
 
+/* Estas cadenas son traducibles */
+const char * text_strings[NUM_TEXTS] = {
+	gettext_noop ("- USE YOUR MOUSE TO BOUNCE THE \n  PUFFLES AND KEEP THEM IN THE AIR \n\n- EVERY TIME YOU BOUNCE A PUFFLE \n  YOU INCREASE YOUR SCORE \n\n- JUGGLE MORE AT ONCE TO WIN MORE \n\n- THE LONGER YOU CAN KEEP BOUNCING \n  THE SAME PUFFLE THE MORE YOU WIN"),
+	gettext_noop ("WARNING! \n\nFIXME: CHANGE THIS \nTEXT."),
+	gettext_noop ("TICKETS"),
+	gettext_noop ("BOUNCE POINTS:"),
+	gettext_noop ("MOST BOUNCED PUFFLE:"),
+	gettext_noop ("PUFFLES JUGGLED:"),
+	gettext_noop ("TOTAL TICKETS:")
+};
 static int text_info [NUM_TEXTS] = { /* Tamaño, por el momento */
 	14,
 	10,
@@ -1465,17 +1475,6 @@ void setup (void) {
 	char *systemdata_path = get_systemdata_path ();
 	SDL_RWops *ttf_facefront;
 	
-	/* Estas cadenas son traducibles */
-	const char * text_strings[NUM_TEXTS] = {
-		_("- USE YOUR MOUSE TO BOUNCE THE \n  PUFFLES AND KEEP THEM IN THE AIR \n\n- EVERY TIME YOU BOUNCE A PUFFLE \n  YOU INCREASE YOUR SCORE \n\n- JUGGLE MORE AT ONCE TO WIN MORE \n\n- THE LONGER YOU CAN KEEP BOUNCING \n  THE SAME PUFFLE THE MORE YOU WIN"),
-		_("WARNING! \n\nFIXME: CHANGE THIS \nTEXT."),
-		_("TICKETS"),
-		_("BOUNCE POINTS:"),
-		_("MOST BOUNCED PUFFLE:"),
-		_("PUFFLES JUGGLED:"),
-		_("TOTAL TICKETS:")
-	};
-
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf (stderr,
@@ -1648,7 +1647,7 @@ void setup (void) {
 			default: temp2 = ttf16_normal;
 		}
 		
-		texts[g] = draw_text (temp2, text_strings[g], &color);
+		texts[g] = draw_text (temp2, _(text_strings[g]), &color);
 	}
 	
 	/* Copiar la palabra "Tickets" en el background */
@@ -1673,7 +1672,7 @@ void setup (void) {
 
 void nuevo_puffle (void) {
 	Puffle *new;
-	static color = 0;
+	static int color = 0;
 	new = (Puffle *) malloc (sizeof (Puffle));
 	
 	/* Inicializar el Puffle */

@@ -6,7 +6,7 @@ bin_PROGRAMS = paddle-puffle
 paddle_puffle_SOURCES = paddle.c draw-text.c draw-text.h gettext.h path.c path.h
 
 if MINGW32
-paddle_puffle_SOURCES += strsep.c
+paddle_puffle_SOURCES += strsep.c strsep.h
 endif
 
 if MACOSX

@@ -1667,7 +1667,7 @@ void setup (void) {
 	
 	TTF_CloseFont (temp1);
 	/* Generador de números aleatorios */
-	srand (SDL_GetTicks ());
+	srand ((unsigned int) getpid ());
 }
 
 void nuevo_puffle (void) {

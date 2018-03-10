@@ -539,6 +539,8 @@ int whole_flip = 0;
 Mix_Chunk * sounds[NUM_SOUNDS];
 Mix_Music * mus_carnie;
 
+SDL_RWops *ttf_facefront;
+
 TTF_Font *ttf20_outline, *ttf20_normal;
 TTF_Font *ttf16_outline, *ttf16_normal;
 TTF_Font *ttf14_normal, *ttf26_normal;
@@ -878,6 +880,15 @@ int game_finish (int bounces, int most_puffles, int role, int tickets) {
 	dest_rect.x = 332 - (done_text_button->w / 2); dest_rect.y = 373;
 	dest_rect.h = done_text_button->h; dest_rect.w = done_text_button->w;
 	SDL_BlitSurface (done_text_button, NULL, screen, &dest_rect);
+	
+	TTF_CloseFont (ttf16_normal);
+	TTF_CloseFont (ttf16_outline);
+	TTF_CloseFont (ttf20_normal);
+	TTF_CloseFont (ttf20_outline);
+	TTF_CloseFont (ttf14_normal);
+	TTF_CloseFont (ttf26_normal);
+	
+	SDL_RWclose (ttf_facefront);
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_ENABLE);
 	
@@ -1473,7 +1484,6 @@ void setup (void) {
 	int g;
 	char buffer_file[8192];
 	char *systemdata_path = get_systemdata_path ();
-	SDL_RWops *ttf_facefront;
 	
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
